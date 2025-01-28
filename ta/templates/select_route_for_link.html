@@ -1,0 +1,23 @@
+{% extends 'home.html' %}
+
+{% block title %}Add Links{% endblock %}
+
+{% block content %}
+<div class="container">
+    <form method="post">
+        {% csrf_token %}
+    
+        <h1>Select Route to Add Route Links</h1>
+        <ul>
+            {% for route in routes %}
+                <li>
+                    <a href="{% url 'add_route_links' route_id=route.route_id %}">
+                        Add Route Link for {{ route.name }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </form>
+
+</div>
+{% endblock %}
