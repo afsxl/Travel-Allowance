@@ -8,10 +8,9 @@
     <div class="list-group">
         {% for route in routes %}
         <div class="list-group-item">
-            <h3>{{ route.source }} → {{ route.destination }}</h3>
+            <h3>{{ route.source.name }} → {{route.destination.name}}</h3>
             <p><strong>Intermediate Stops:</strong> {{ route.intermediates|join:", " }}</p>
             <a href="{% url 'add_route_links' route.id %}" class="btn btn-info">Add Route Links</a>
-            <!-- <a href="{% url 'add_route_path' route.id %}" class="btn btn-warning">Add Route Path</a> -->
         </div>
         {% endfor %}
     </div>
@@ -26,11 +25,13 @@
         max-width: 1000px;
         margin: 0 auto;
     }
+
     h1 {
         text-align: center;
         color: #333;
         margin-bottom: 20px;
     }
+
     .list-group-item {
         margin-bottom: 15px;
         border: 1px solid #ddd;
@@ -38,6 +39,7 @@
         padding: 20px;
         background-color: #f9f9f9;
     }
+
     .btn {
         padding: 10px 20px;
         margin-top: 10px;
@@ -45,12 +47,15 @@
         text-decoration: none;
         border-radius: 5px;
     }
+
     .btn-info {
         background-color: #17a2b8;
     }
+
     .btn-warning {
         background-color: #ffc107;
     }
+
     .btn:hover {
         opacity: 0.8;
     }

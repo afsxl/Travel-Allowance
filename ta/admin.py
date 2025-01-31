@@ -1,6 +1,6 @@
 from django.contrib import admin
-from .models import  Route,RouteStop,RouteLink,RoutePath
-# Register your models here.
+from .models import *
+
 admin.site.register(RouteStop)
 admin.site.register(Route)
 admin.site.register(RouteLink)
