@@ -99,7 +99,7 @@ def add_route(request):
             Route.objects.create(
                 source=source,
                 destination=destination,
-            ).save()
+            )
 
             return render(
                 request,
@@ -110,17 +110,12 @@ def add_route(request):
 
 
 @login_required
-def select_route_for_link(request):
-    routes = Route.objects.all()
-    return render(request, "select_route_for_link.html", {"routes": routes})
-
-
-@login_required
 def add_route_links(request, routeId):
     route = Route.objects.get(id=routeId)
+    routeLinks = RouteLink.objects.filter(route=routeId)
     stops = RouteStop.objects.all()
     last_stop = route.source
-    modes = RouteLink.MODE_CHOICES
+    modes = ModesOfTravel.choices
 
     last_link = RouteLink.objects.filter(route=route).order_by("-id").first()
     if last_link:
@@ -161,6 +156,7 @@ def add_route_links(request, routeId):
             "stops": stops,
             "last_stop": last_stop,
             "modes": modes,
+            "routeLinks": routeLinks,
         },
     )
 
@@ -210,3 +206,9 @@ def search_route_stops(request):
         results = RouteStop.objects.filter(name__icontains=query).values("id", "name")
         return JsonResponse(list(results), safe=False)
     return JsonResponse([], safe=False)
+
+
+@login_required
+def select_route_for_link(request):
+    routes = Route.objects.all()
+    return render(request, "select_route_for_link.html", {"routes": routes})

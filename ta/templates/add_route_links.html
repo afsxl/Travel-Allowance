@@ -13,14 +13,17 @@
             <div class="col">
                 <label for="start">Start:</label>
                 <select id="start" name="start" required>
+                    <option value="" selected disabled>-- Select Start Location --</option>
                     {% for stop in stops %}
                     <option value="{{ stop.id }}">{{ stop.name }}</option>
                     {% endfor %}
                 </select>
             </div>
+
             <div class="col">
                 <label for="end">End:</label>
                 <select id="end" name="end" required>
+                    <option value="" selected disabled>-- Select End Location --</option>
                     {% for stop in stops %}
                     <option value="{{ stop.id }}">{{ stop.name }}</option>
                     {% endfor %}
@@ -32,7 +35,7 @@
             <div class="col">
                 <label for="mode">Mode:</label>
                 <select id="mode" name="mode" required>
-
+                    <option value="" selected disabled>-- Select Mode Of Travel --</option>
                     {% for value, label in modes %}
                     <option value="{{ value }}">{{ label }}</option>
                     {% endfor %}
@@ -43,6 +46,7 @@
                 <label for="distance">Distance (km):</label>
                 <input type="number" id="distance" name="distance" required>
             </div>
+
             <div class="col">
                 <label for="price">Price:</label>
                 <input type="number" id="price" name="price" required>
@@ -50,15 +54,19 @@
         </div>
 
         <div class="form-group text-center">
-            <button type="button" id="add-route" class="btn btn-success">+ Add Route</button>
+            <button type="submit" id="add-route" class="btn btn-success">+ Add Route</button>
         </div>
 
         <div id="route-list" class="route-list">
-            <!-- Dynamically added rows will appear here -->
-        </div>
-
-        <div class="form-group text-center">
-            <button type="submit" class="btn btn-primary">Save All</button>
+            {% for routeLink in routeLinks %}
+            <div class="route-item">
+                <span>Start : {{ routeLink.start.name }} ,
+                    End : {{ routeLink.end.name }} ,
+                    Mode Of Travel : {{ routeLink.get_mode_display }} ,
+                    Distance : {{ routeLink.distance }} ,
+                    Price : {{ routeLink.price }}</span>
+            </div>
+            {% endfor %}
         </div>
     </form>
 </div>
@@ -69,7 +77,9 @@
         padding: 30px;
         border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        max-width: 800px;
+        min-width: 800px;
+        width: 60%;
+        max-width: 1600px;
         margin: 20px auto;
         font-family: 'Arial', sans-serif;
         color: #333;
@@ -90,7 +100,7 @@
 
     .col {
         flex: 1;
-        margin-right: 10px;
+        margin-right: 5px;
     }
 
     .col:last-child {
@@ -181,7 +191,7 @@
     }
 </style>
 
-<script>
+<!-- <script>
     document.getElementById('add-route').addEventListener('click', function () {
         const start = document.getElementById('start').value;
         const end = document.getElementById('end').value;
@@ -217,5 +227,5 @@
         document.getElementById('distance').value = '';
         document.getElementById('price').value = '';
     });
-</script>
+</script> -->
 {% endblock %}
