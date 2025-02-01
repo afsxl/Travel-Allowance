@@ -30,6 +30,19 @@ class Route(models.Model):
     createdAt = models.DateTimeField(default=now)
 
 
+class TemporaryRouteLink(models.Model):
+    route = models.ForeignKey(Route, on_delete=models.CASCADE)
+    start = models.ForeignKey(
+        RouteStop, on_delete=models.CASCADE, related_name="temporaryRouteLinkStart"
+    )
+    end = models.ForeignKey(
+        RouteStop, on_delete=models.CASCADE, related_name="temporaryRouteLinkEnd"
+    )
+    distance = models.DecimalField(max_digits=6, decimal_places=2, default=0.0)
+    mode = models.IntegerField(choices=ModesOfTravel.choices, null=False)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
+
 class RouteLink(models.Model):
     route = models.ForeignKey(Route, on_delete=models.CASCADE)
     start = models.ForeignKey(
