@@ -53,8 +53,29 @@ def home_view(request):
 
 
 @login_required
+def add_route_stop(request):
+    routeStopName = ""
+    message = ""
+    stopTypes = StopTypes.choices
+
+    if request.method == "POST":
+        routeStopName = request.POST.get("routeStopName")
+        stopType = request.POST.get("stopType")
+        if RouteStop.objects.filter(name=routeStopName).exists():
+            message = f"Route stop {routeStopName} already exists!"
+        else:
+            RouteStop.objects.create(name=routeStopName, stopType=stopType).save()
+            return redirect("add_route_stop")
+    return render(
+        request,
+        "add_route_stop.html",
+        {"routeStopName": routeStopName, "message": message, "stopTypes": stopTypes},
+    )
+
+
+@login_required
 def add_route(request):
-    routeStops = RouteStop.objects.all()
+    routeStops = RouteStop.objects.exclude(stopType=StopTypes.INTERMEDIATE_STOP)
 
     if request.method == "POST":
         sourceId = request.POST.get("source")
@@ -64,11 +85,10 @@ def add_route(request):
             source = RouteStop.objects.get(id=sourceId)
             destination = RouteStop.objects.get(id=destinationId)
 
-            route = Route.objects.create(
+            Route.objects.create(
                 source=source,
                 destination=destination,
-            )
-            route.save()
+            ).save()
 
             return render(
                 request,
@@ -169,58 +189,7 @@ def add_route_path(request, route_id):
 @login_required
 def view_routes(request):
     routes = Route.objects.all()
-
-    # for route in Route.objects.all():
-    #     paths = RoutePath.objects.filter(route=route)
-    #     route_data = {
-    #         "id": route.route_id,
-    #         "name": f"{route.source.name} to {route.destination.name}",
-    #         "paths": [],
-    #     }
-
-    #     for path in paths:
-    #         route_data["paths"].append(
-    #             {
-    #                 "source": path.source.name,
-    #                 "destination": path.destination.name,
-    #                 "route_links": [link.start.name for link in path.route_links.all()],
-    #             }
-    #         )
-
-    #     routes_with_details.append(route_data)
-
     return render(request, "view_routes.html", {"routes": routes})
-
-
-@login_required
-def add_route_stop(request):
-    routeStopName = ""
-    message = ""
-    if request.method == "POST":
-
-        routeStopName = request.POST.get("routeStopName")
-
-        if RouteStop.objects.filter(name=routeStopName).exists():
-            message = f"Route stop {routeStopName} already exists!"
-        # if form.is_valid():
-        #     route_stop_name = form.cleaned_data["name"]
-
-        #     if RouteStop.objects.filter(name=route_stop_name).exists():
-        #         messages.info(
-        #             request, f"Route stop '{route_stop_name}' already exists!"
-        #         )
-        #     else:
-        #         form.save()
-        #         messages.info(
-        #             request, f"Route stop '{route_stop_name}' added successfully!"
-        #         )
-        else:
-            return redirect("add_route_stop")
-    return render(
-        request,
-        "add_route_stop.html",
-        {"routeStopName": routeStopName, "message": message},
-    )
 
 
 @login_required

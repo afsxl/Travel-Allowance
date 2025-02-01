@@ -2,25 +2,23 @@ from django.db import models
 from django.utils.timezone import now
 
 
+class StopTypes(models.TextChoices):
+    INTERMEDIATE_STOP = 1, "Intermediate Stop"
+    INSTITUTE = 2, "Institute"
+    VALUATION_CAMP = 3, "Valuation Camp"
+
+
 class RouteStop(models.Model):
     name = models.CharField(max_length=255, unique=True, null=False)
-    isInstitute = models.BooleanField(default=False)
-    isValuationCamp = models.BooleanField(default=False)
-    isIntermediateStop = models.BooleanField(default=False)
+    stopType = models.IntegerField(choices=StopTypes.choices, null=False)
 
 
 class Route(models.Model):
     source = models.ForeignKey(
-        RouteStop,
-        on_delete=models.CASCADE,
-        null=False,
-        related_name="routeSource",
+        RouteStop, on_delete=models.CASCADE, null=False, related_name="routeSource"
     )
     destination = models.ForeignKey(
-        RouteStop,
-        on_delete=models.CASCADE,
-        null=False,
-        related_name="routeDestination",
+        RouteStop, on_delete=models.CASCADE, null=False, related_name="routeDestination"
     )
     createdAt = models.DateTimeField(default=now)
 
@@ -31,8 +29,8 @@ class RouteLink(models.Model):
         ("Train", "Train"),
         ("Bus", "Bus"),
         ("Walk", "Walk"),
-        ("Not Selected", "Not Selected"),
     ]
+
     route = models.ForeignKey(Route, on_delete=models.CASCADE)
     start = models.ForeignKey(
         RouteStop, on_delete=models.CASCADE, related_name="routeLinkStart"
@@ -41,7 +39,7 @@ class RouteLink(models.Model):
         RouteStop, on_delete=models.CASCADE, related_name="routeLinkEnd"
     )
     distance = models.DecimalField(max_digits=6, decimal_places=2, default=0.0)
-    mode = models.CharField(max_length=20, choices=MODE_CHOICES, default="Not Selected")
+    mode = models.CharField(max_length=20, choices=MODE_CHOICES, null=False)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
 
