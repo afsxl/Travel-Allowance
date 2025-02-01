@@ -5,27 +5,42 @@
 {% block content %}
 <div class="container">
     <h1>Add New Route</h1>
+    <p>{{ message }}</p>
     <form method="POST">
         {% csrf_token %}
 
-        <!-- Source Dropdown -->
         <div class="form-group">
-            <label for="source">Source</label>
+            <label for="source">Source {{ sourceId }}</label>
             <select name="source" id="source" class="form-control" required>
-                <option value="">Select Source</option>
+                {% if not sourceId %}
+                <option value="" disabled selected>-- Select Source --</option>
+                {% else %}
+                <option value="" disabled>-- Select Source --</option>
+                {% endif %}
                 {% for stop in route_stops %}
+                {% if stop.id|stringformat:"s" == sourceId %}
+                <option value="{{ stop.id }}" selected>{{ stop.name }}</option>
+                {% else %}
                 <option value="{{ stop.id }}">{{ stop.name }}</option>
+                {% endif %}
                 {% endfor %}
             </select>
         </div>
 
-        <!-- Destination Dropdown -->
         <div class="form-group">
             <label for="destination">Destination</label>
             <select name="destination" id="destination" class="form-control" required>
-                <option value="">Select Destination</option>
+                {% if not destinationId %}
+                <option value="" disabled selected>-- Select Source --</option>
+                {% else %}
+                <option value="" disabled>-- Select Source --</option>
+                {% endif %}
                 {% for stop in route_stops %}
+                {% if stop.id|stringformat:"s" == destinationId %}
+                <option value="{{ stop.id }}" selected>{{ stop.name }}</option>
+                {% else %}
                 <option value="{{ stop.id }}">{{ stop.name }}</option>
+                {% endif %}
                 {% endfor %}
             </select>
         </div>

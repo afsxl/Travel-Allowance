@@ -81,7 +81,18 @@ def add_route(request):
         sourceId = request.POST.get("source")
         destinationId = request.POST.get("destination")
 
-        if sourceId and destinationId and (sourceId != destinationId):
+        if sourceId and destinationId:
+            if sourceId == destinationId:
+                return render(
+                    request,
+                    "add_route.html",
+                    {
+                        "route_stops": routeStops,
+                        "message": "Source and Destination are same",
+                        "sourceId": sourceId,
+                        "destinationId": destinationId,
+                    },
+                )
             source = RouteStop.objects.get(id=sourceId)
             destination = RouteStop.objects.get(id=destinationId)
 
@@ -93,7 +104,7 @@ def add_route(request):
             return render(
                 request,
                 "add_route.html",
-                {"route_stops": routeStops, "success": "Route added successfully"},
+                {"route_stops": routeStops, "message": "Route added successfully"},
             )
     return render(request, "add_route.html", {"route_stops": routeStops})
 
