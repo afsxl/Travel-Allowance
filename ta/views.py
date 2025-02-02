@@ -133,7 +133,7 @@ def add_route_links(request, routeId):
         )
 
         start = RouteStop.objects.get(id=startId)
-        end = RouteStop.objects.get(id=endId)
+        last_stop = end = RouteStop.objects.get(id=endId)
         distance = float(distance)
         price = float(price)
         TemporaryRouteLink.objects.create(
@@ -172,6 +172,8 @@ def add_route_links(request, routeId):
             order=routeLink.order,
         )
     routeLinks = TemporaryRouteLink.objects.filter(route=routeId).order_by("order")
+    if routeLinks.count():
+        last_stop = routeLinks.last().end
 
     return render(
         request,
@@ -187,12 +189,16 @@ def add_route_links(request, routeId):
 
 
 @login_required
-def remove_route_link(request, routeLinkId):
-    route = TemporaryRouteLink.objects.filter(id=routeLinkId).last().route
+def remove_route_link(request, routeLinkId, routeId):
+    route = Route.objects.get(id=routeId)
+    last_stop = route.source
     stops = RouteStop.objects.all()
     modes = ModesOfTravel.choices
-    TemporaryRouteLink.objects.filter(id=routeLinkId).delete()
+    if TemporaryRouteLink.objects.filter(id=routeLinkId).exists():
+        TemporaryRouteLink.objects.filter(id=routeLinkId).delete()
     routeLinks = TemporaryRouteLink.objects.filter(route=route).order_by("order")
+    if routeLinks.count():
+        last_stop = routeLinks.last().end
 
     return render(
         request,
@@ -200,6 +206,7 @@ def remove_route_link(request, routeLinkId):
         {
             "route": route,
             "stops": stops,
+            "last_stop": last_stop,
             "modes": modes,
             "routeLinks": routeLinks,
         },

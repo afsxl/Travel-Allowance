@@ -15,9 +15,17 @@
             <div class="col">
                 <label for="start">Start:</label>
                 <select id="start" name="start" required>
+                    {% if not last_stop %}
                     <option value="" selected disabled>-- Select Start Location --</option>
+                    {% else %}
+                    <option value="" disabled>-- Select Start Location --</option>
+                    {% endif %}
                     {% for stop in stops %}
+                    {% if last_stop.id == stop.id %}
+                    <option value="{{ stop.id }}" selected>{{ stop.name }}</option>
+                    {% else %}
                     <option value="{{ stop.id }}">{{ stop.name }}</option>
+                    {% endif %}
                     {% endfor %}
                 </select>
             </div>
@@ -68,7 +76,7 @@
                     Distance : {{ routeLink.distance }} ,
                     Price : {{ routeLink.price }}</span>
                 <div>
-                    <a href="{% url 'remove_route_link' routeLink.id %}">Delete</a>
+                    <a href="{% url 'remove_route_link' routeLink.id route.id %}">Delete</a>
                 </div>
             </div>
             {% endfor %}
