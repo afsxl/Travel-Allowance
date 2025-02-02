@@ -208,6 +208,6 @@ def search_route_stops(request):
 
 
 @login_required
-def select_route_for_link(request):
+def generate_report(request):
     routes = Route.objects.all()
-    return render(request, "select_route_for_link.html", {"routes": routes})
+    return render(request, "generate_report.html", {"routes": routes})

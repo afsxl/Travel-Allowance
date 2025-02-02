@@ -18,12 +18,10 @@ urlpatterns = [
     path("view-routes/", views.view_routes, name="view_routes"),
     path("add-route-stop/", views.add_route_stop, name="add_route_stop"),
     path(
-        "select-route-for-link/",
-        views.select_route_for_link,
-        name="select_route_for_link",
+        "generate_report/",
+        views.generate_report,
+        name="generate_report",
     ),
-    # Place management
-    path("search-places/", views.search_route_stops, name="search_places"),
     path("search-route-stops/", views.search_route_stops, name="search_route_stops"),
 ]
 
