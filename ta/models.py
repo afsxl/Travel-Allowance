@@ -2,13 +2,13 @@ from django.db import models
 from django.utils.timezone import now
 
 
-class StopTypes(models.TextChoices):
+class StopTypes(models.IntegerChoices):
     INTERMEDIATE_STOP = 1, "Intermediate Stop"
     INSTITUTE = 2, "Institute"
     VALUATION_CAMP = 3, "Valuation Camp"
 
 
-class ModesOfTravel(models.TextChoices):
+class ModesOfTravel(models.IntegerChoices):
     TAXI = 1, "Taxi"
     TRAIN = 2, "Train"
     BUS = 3, "Bus"
