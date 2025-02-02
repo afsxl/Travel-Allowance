@@ -132,8 +132,6 @@ def add_route_links(request, routeId):
             + 1
         )
 
-        print(order)
-
         start = RouteStop.objects.get(id=startId)
         end = RouteStop.objects.get(id=endId)
         distance = float(distance)
@@ -192,7 +190,6 @@ def add_route_links(request, routeId):
 def remove_route_link(request, routeLinkId):
     route = TemporaryRouteLink.objects.filter(id=routeLinkId).last().route
     stops = RouteStop.objects.all()
-    last_stop = route.source
     modes = ModesOfTravel.choices
     TemporaryRouteLink.objects.filter(id=routeLinkId).delete()
     routeLinks = TemporaryRouteLink.objects.filter(route=route).order_by("order")
@@ -203,7 +200,6 @@ def remove_route_link(request, routeLinkId):
         {
             "route": route,
             "stops": stops,
-            "last_stop": last_stop,
             "modes": modes,
             "routeLinks": routeLinks,
         },
@@ -211,10 +207,43 @@ def remove_route_link(request, routeLinkId):
 
 
 def save_route_links(request, routeId):
-    RouteLink.objects.filter(route=routeId).delete()
+    currentRoute = Route.objects.get(id=routeId)
+    sameRoutes = Route.objects.filter(
+        source=currentRoute.source, destination=currentRoute.destination
+    ).exclude(id=routeId)
+
     temporaryRouteLinks = TemporaryRouteLink.objects.filter(route=routeId).order_by(
         "order"
     )
+
+    for route in sameRoutes:
+        routeLinks = RouteLink.objects.filter(route=route).order_by("order")
+        if routeLinks.count() != temporaryRouteLinks.count():
+            continue
+        duplicate = True
+        for routeLink, temporaryRouteLink in zip(routeLinks, temporaryRouteLinks):
+            if (
+                routeLink.start != temporaryRouteLink.start
+                or routeLink.end != temporaryRouteLink.end
+                or routeLink.distance != temporaryRouteLink.distance
+                or routeLink.price != temporaryRouteLink.price
+            ):
+                duplicate = False
+                break
+        if duplicate:
+            return render(
+                request,
+                "add_route_links.html",
+                {
+                    "route": route,
+                    "stops": RouteStop.objects.all(),
+                    "modes": ModesOfTravel.choices,
+                    "routeLinks": temporaryRouteLinks,
+                    "message": "Duplicate Route Exists",
+                },
+            )
+
+    RouteLink.objects.filter(route=routeId).delete()
     for index, temporaryRouteLink in enumerate(temporaryRouteLinks):
         RouteLink.objects.create(
             route=temporaryRouteLink.route,

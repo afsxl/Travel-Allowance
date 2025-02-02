@@ -6,6 +6,8 @@
 <div class="container">
     <h3>Route: {{ route.source.name }} → {{ route.destination.name }}</h3>
 
+    <p>{{ message }}</p>
+
     <form method="post" action="{% url 'add_route_links' route.id %}">
         {% csrf_token %}
 
