@@ -1,4 +1,18 @@
-/__pychache__
-/migrations
+# Byte-compiled / cached
+**/__pycache__/
 
-.sqlite3
+# Django migrations
+**/migrations/
+
+# SQLite database
+*.sqlite3
+
+# Logs
+logs/
+*.log
+
+# IDE / Editor settings
+.vscode/
+.idea/
+*.swp
+
