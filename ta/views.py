@@ -5,7 +5,6 @@ from django.contrib import messages
 from django.db.models import Max
 from django.contrib.auth.decorators import login_required
 from .models import *
-from .forms import *
 from django.http import JsonResponse
 
 
