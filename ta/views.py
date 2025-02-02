@@ -277,15 +277,6 @@ def view_routes(request):
 
 
 @login_required
-def search_route_stops(request):
-    if request.method == "GET" and "query" in request.GET:
-        query = request.GET.get("query", "")
-        results = RouteStop.objects.filter(name__icontains=query).values("id", "name")
-        return JsonResponse(list(results), safe=False)
-    return JsonResponse([], safe=False)
-
-
-@login_required
 def generate_report(request):
     routes = Route.objects.all()
     return render(request, "generate_report.html", {"routes": routes})

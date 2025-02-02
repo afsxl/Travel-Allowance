@@ -31,7 +31,6 @@ urlpatterns = [
         views.generate_report,
         name="generate_report",
     ),
-    path("search-route-stops/", views.search_route_stops, name="search_route_stops"),
 ]
 
 # Set the login URL to match your custom login page
