@@ -1,8 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.db.models import Max
 from django.contrib.auth.decorators import login_required
 from .models import *
 from django.http import JsonResponse
@@ -111,41 +110,70 @@ def add_route(request):
 @login_required
 def add_route_links(request, routeId):
     route = Route.objects.get(id=routeId)
-    routeLinks = RouteLink.objects.filter(route=routeId)
     stops = RouteStop.objects.all()
     last_stop = route.source
     modes = ModesOfTravel.choices
 
-    last_link = RouteLink.objects.filter(route=route).order_by("-id").first()
-    if last_link:
-        last_stop = last_link.end
-
     if request.method == "POST":
-        start_id = request.POST.get("start")
-        end_id = request.POST.get("end")
+        startId = request.POST.get("start")
+        endId = request.POST.get("end")
         mode = request.POST.get("mode")
         distance = request.POST.get("distance")
         price = request.POST.get("price")
 
-        try:
-            start = RouteStop.objects.get(id=start_id)
-            end = RouteStop.objects.get(id=end_id)
-            distance = float(distance)
-            price = float(price)
+        order = (
+            1
+            if TemporaryRouteLink.objects.filter(route=routeId).order_by("order").last()
+            == None
+            else TemporaryRouteLink.objects.filter(route=routeId)
+            .order_by("order")
+            .last()
+            .order
+            + 1
+        )
 
-            RouteLink.objects.create(
-                route=route,
-                start=start,
-                end=end,
-                mode=mode,
-                distance=distance,
-                price=price,
-            )
-            messages.success(request, "Route link added successfully!")
-            return redirect("add_route_links", id=route.id)
+        print(order)
 
-        except Exception as e:
-            messages.error(request, f"An error occurred: {e}")
+        start = RouteStop.objects.get(id=startId)
+        end = RouteStop.objects.get(id=endId)
+        distance = float(distance)
+        price = float(price)
+        TemporaryRouteLink.objects.create(
+            route=route,
+            start=start,
+            end=end,
+            mode=mode,
+            distance=distance,
+            price=price,
+            order=order,
+        )
+
+        routeLinks = TemporaryRouteLink.objects.filter(route=routeId).order_by("order")
+        return render(
+            request,
+            "add_route_links.html",
+            {
+                "route": route,
+                "stops": stops,
+                "last_stop": last_stop,
+                "modes": modes,
+                "routeLinks": routeLinks,
+            },
+        )
+
+    TemporaryRouteLink.objects.filter(route=routeId).delete()
+    routeLinks = RouteLink.objects.filter(route=routeId).order_by("order")
+    for routeLink in routeLinks:
+        TemporaryRouteLink.objects.create(
+            route=routeLink.route,
+            start=routeLink.start,
+            end=routeLink.end,
+            mode=routeLink.mode,
+            distance=routeLink.distance,
+            price=routeLink.price,
+            order=routeLink.order,
+        )
+    routeLinks = TemporaryRouteLink.objects.filter(route=routeId).order_by("order")
 
     return render(
         request,
@@ -161,9 +189,55 @@ def add_route_links(request, routeId):
 
 
 @login_required
+def remove_route_link(request, routeLinkId):
+    route = TemporaryRouteLink.objects.filter(id=routeLinkId).last().route
+    stops = RouteStop.objects.all()
+    last_stop = route.source
+    modes = ModesOfTravel.choices
+    TemporaryRouteLink.objects.filter(id=routeLinkId).delete()
+    routeLinks = TemporaryRouteLink.objects.filter(route=route).order_by("order")
+
+    return render(
+        request,
+        "add_route_links.html",
+        {
+            "route": route,
+            "stops": stops,
+            "last_stop": last_stop,
+            "modes": modes,
+            "routeLinks": routeLinks,
+        },
+    )
+
+
+def save_route_links(request, routeId):
+    RouteLink.objects.filter(route=routeId).delete()
+    temporaryRouteLinks = TemporaryRouteLink.objects.filter(route=routeId).order_by(
+        "order"
+    )
+    for index, temporaryRouteLink in enumerate(temporaryRouteLinks):
+        RouteLink.objects.create(
+            route=temporaryRouteLink.route,
+            start=temporaryRouteLink.start,
+            end=temporaryRouteLink.end,
+            mode=temporaryRouteLink.mode,
+            distance=temporaryRouteLink.distance,
+            price=temporaryRouteLink.price,
+            order=index + 1,
+        )
+
+    TemporaryRouteLink.objects.filter(route=routeId).delete()
+    return redirect("view_routes")
+
+
+@login_required
 def view_routes(request):
     routes = Route.objects.all()
-    return render(request, "view_routes.html", {"routes": routes})
+    routesWithLinks = []
+    for route in routes:
+        routeLinks = RouteLink.objects.filter(route=route)
+        routesWithLinks.append({"route": route, "routeLinks": routeLinks})
+    return render(request, "view_routes.html", {"routesWithLinks": routesWithLinks})
 
 
 @login_required

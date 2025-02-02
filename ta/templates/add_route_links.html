@@ -65,10 +65,16 @@
                     Mode Of Travel : {{ routeLink.get_mode_display }} ,
                     Distance : {{ routeLink.distance }} ,
                     Price : {{ routeLink.price }}</span>
+                <div>
+                    <a href="{% url 'remove_route_link' routeLink.id %}">Delete</a>
+                </div>
             </div>
             {% endfor %}
         </div>
     </form>
+    <div class="form-group text-center">
+        <a href="{% url 'save_route_links' route.id %}">Save All</a>
+    </div>
 </div>
 
 <style>
@@ -114,7 +120,7 @@
     }
 
     select,
-    input[type="number"] {
+    input[type=" number"] {
         width: 100%;
         padding: 10px;
         border: 1px solid #ccc;
@@ -125,7 +131,9 @@
     }
 
     select:focus,
-    input[type="number"]:focus {
+    input[type="number"
+
+    ]:focus {
         border-color: #007bff;
         outline: none;
     }
@@ -133,14 +141,16 @@
     .btn {
         width: 150px;
         padding: 10px;
-        font-size: 1.2rem;
+        font-size:
+            1.2rem;
         border-radius: 6px;
     }
 
     .btn-success {
         background-color: #28a745;
         color: white;
-        border: none;
+        border:
+            none;
         transition: background-color 0.3s ease;
     }
 
@@ -152,7 +162,8 @@
         background-color: #007bff;
         color: white;
         border: none;
-        transition: background-color 0.3s ease;
+        transition:
+            background-color 0.3s ease;
     }
 
     .btn-primary:hover {
@@ -164,7 +175,8 @@
         border: 1px solid #ccc;
         border-radius: 6px;
         padding: 10px;
-        background-color: #f8f9fa;
+        background-color:
+            #f8f9fa;
     }
 
     .route-item {
@@ -179,7 +191,8 @@
 
     .delete-btn {
         background-color: #dc3545;
-        color: white;
+        color:
+            white;
         border: none;
         padding: 5px 10px;
         border-radius: 4px;

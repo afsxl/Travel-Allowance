@@ -6,13 +6,23 @@ urlpatterns = [
     # Authentication URLs
     path("login/", views.login_view, name="login"),
     path("signup/", views.signup_view, name="signup"),
-    path("logout/", auth_views.LogoutView.as_view(), name="logout"),
+    path("logout/", views.logout_view, name="logout"),
     # Home view
     path("home/", views.home_view, name="home"),
     # Routes and related functionality
     path("add-route/", views.add_route, name="add_route"),
     path(
         "add-route-links/<int:routeId>/", views.add_route_links, name="add_route_links"
+    ),
+    path(
+        "remove-route-link/<int:routeLinkId>/",
+        views.remove_route_link,
+        name="remove_route_link",
+    ),
+    path(
+        "save-route-links/<int:routeId>/",
+        views.save_route_links,
+        name="save_route_links",
     ),
     path("view-routes/", views.view_routes, name="view_routes"),
     path("add-route-stop/", views.add_route_stop, name="add_route_stop"),

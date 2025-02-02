@@ -6,11 +6,21 @@
 <div class="container">
     <h1>View Routes</h1>
     <div class="list-group">
-        {% for route in routes %}
+        {% for routeWithLinks in routesWithLinks %}
         <div class="list-group-item">
-            <h3>{{ route.source.name }} → {{route.destination.name}}</h3>
-            <p><strong>Intermediate Stops:</strong> {{ route.intermediates|join:", " }}</p>
-            <a href="{% url 'add_route_links' route.id %}" class="btn btn-info">Add Route Links</a>
+            <h3>{{ routeWithLinks.route.source.name }} → {{ routeWithLinks.route.destination.name }}</h3>
+            <p><strong>Intermediate Stops</strong></p>
+            {% for routeLink in routeWithLinks.routeLinks %}
+            <div class="list-group-item">
+                <span>Start : {{ routeLink.start.name }} ,
+                    End : {{ routeLink.end.name }} ,
+                    Mode Of Travel : {{ routeLink.get_mode_display }} ,
+                    Distance : {{ routeLink.distance }} ,
+                    Price : {{ routeLink.price }}</span>
+
+            </div>
+            {% endfor %}
+            <a href="{% url 'add_route_links' routeWithLinks.route.id %}" class="btn btn-info">Add Route Links</a>
         </div>
         {% endfor %}
     </div>
