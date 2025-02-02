@@ -41,6 +41,7 @@ class TemporaryRouteLink(models.Model):
     distance = models.DecimalField(max_digits=6, decimal_places=2, default=0.0)
     mode = models.IntegerField(choices=ModesOfTravel.choices, null=False)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    order = models.IntegerField(null=False)
 
 
 class RouteLink(models.Model):
@@ -54,14 +55,4 @@ class RouteLink(models.Model):
     distance = models.DecimalField(max_digits=6, decimal_places=2, default=0.0)
     mode = models.IntegerField(choices=ModesOfTravel.choices, null=False)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-
-
-class RoutePath(models.Model):
-    route = models.ForeignKey(Route, on_delete=models.CASCADE)
-    source = models.ForeignKey(
-        RouteStop, on_delete=models.CASCADE, related_name="routePathSource"
-    )
-    destination = models.ForeignKey(
-        RouteStop, on_delete=models.CASCADE, related_name="routePathDestination"
-    )
-    order = models.PositiveIntegerField()
+    order = models.IntegerField(null=False)

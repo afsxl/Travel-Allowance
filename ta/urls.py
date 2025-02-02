@@ -14,7 +14,6 @@ urlpatterns = [
     path(
         "add-route-links/<int:routeId>/", views.add_route_links, name="add_route_links"
     ),
-    path("add-route-path/<int:routeId>/", views.add_route_path, name="add_route_path"),
     path("view-routes/", views.view_routes, name="view_routes"),
     path("add-route-stop/", views.add_route_stop, name="add_route_stop"),
     path(

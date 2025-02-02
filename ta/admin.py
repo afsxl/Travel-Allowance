@@ -4,4 +4,4 @@ from .models import *
 admin.site.register(RouteStop)
 admin.site.register(Route)
 admin.site.register(RouteLink)
-admin.site.register(RoutePath)
+admin.site.register(TemporaryRouteLink)

@@ -161,38 +161,6 @@ def add_route_links(request, routeId):
 
 
 @login_required
-def add_route_path(request, route_id):
-    route = get_object_or_404(Route, id=route_id)
-
-    source = route.source
-    destination = route.destination
-    intermediate_links = RouteLink.objects.filter(route=route).order_by("id")
-
-    max_order = (
-        RoutePath.objects.filter(route=route).aggregate(Max("order"))["order__max"] or 0
-    )
-    next_order = max_order + 1
-
-    try:
-        route_path = RoutePath.objects.create(
-            route=route,
-            source=source,
-            destination=destination,
-            order=next_order,
-        )
-
-        route_path.route_links.set(intermediate_links)
-        route_path.save()
-
-        messages.success(request, "Route path added successfully!")
-        return redirect("view_routes")
-
-    except Exception as e:
-        messages.error(request, f"An error occurred while saving the route path: {e}")
-        return redirect("view_routes")
-
-
-@login_required
 def view_routes(request):
     routes = Route.objects.all()
     return render(request, "view_routes.html", {"routes": routes})
