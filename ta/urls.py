@@ -2,13 +2,12 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # Authentication URLs
+    # Authentication
     path("login/", views.login_view, name="login"),
     path("signup/", views.signup_view, name="signup"),
     path("logout/", views.logout_view, name="logout"),
-    # Home view
+    # Home
     path("home/", views.home_view, name="home"),
-    # Routes and related functionality
     path("add-route/", views.add_route, name="add_route"),
     path(
         "add-route-links/<int:routeId>/", views.add_route_links, name="add_route_links"
@@ -25,6 +24,11 @@ urlpatterns = [
     ),
     path("view-routes/", views.view_routes, name="view_routes"),
     path("add-route-stop/", views.add_route_stop, name="add_route_stop"),
+    path(
+        "add-intermediate-stop/",
+        views.add_intermediate_stop,
+        name="add_intermediate_stop",
+    ),
     path(
         "generate_report/",
         views.generate_report,

@@ -6,21 +6,27 @@
 <div class="container">
     <h1>View Routes</h1>
     <div class="list-group">
-        {% for routeWithLinks in routesWithLinks %}
+        {% for routeWithPaths in routesWithPaths %}
         <div class="list-group-item">
-            <h3>{{ routeWithLinks.route.source.name }} → {{ routeWithLinks.route.destination.name }}</h3>
-            <p><strong>Intermediate Stops</strong></p>
-            {% for routeLink in routeWithLinks.routeLinks %}
-            <div class="list-group-item">
-                <span>Start : {{ routeLink.start.name }} ,
-                    End : {{ routeLink.end.name }} ,
-                    Mode Of Travel : {{ routeLink.get_mode_display }} ,
-                    Distance : {{ routeLink.distance }} ,
-                    Price : {{ routeLink.price }}</span>
+            <h3>{{ routeWithPaths.route.source.name }} → {{ routeWithPaths.route.destination.name }}</h3>
 
+            {% if routeWithPaths.routePaths.length %}
+            <p><strong>Intermediate Stops</strong></p>
+            {% for routePath in routeWithPaths.routePaths %}
+            <div class="list-group-item">
+                <span>
+                    Start : {{ routePath.start.name }},
+                    End : {{ routePath.end.name }},
+                    Mode Of Travel : {{ routePath.get_mode_display }},
+                    Distance : {{ routePath.distance }},
+                    Price : {{ routePath.price }}
+                </span>
             </div>
+            <a href="{% url 'add_route_links' routeWithPaths.route.id %}" class="btn btn-info">Edit Route Links</a>
             {% endfor %}
-            <a href="{% url 'add_route_links' routeWithLinks.route.id %}" class="btn btn-info">Add Route Links</a>
+            {% else %}
+            <a href="{% url 'add_route_links' routeWithPaths.route.id %}" class="btn btn-info">Add Route Links</a>
+            {% endif %}
         </div>
         {% endfor %}
     </div>

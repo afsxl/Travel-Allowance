@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm
+from django.db.models import Q
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -50,6 +51,16 @@ def home_view(request):
 
 
 @login_required
+def view_routes(request):
+    routes = Route.objects.all()
+    routesWithPaths = []
+    for route in routes:
+        routePaths = RoutePath.objects.filter(route=route)
+        routesWithPaths.append({"route": route, "routePaths": routePaths})
+    return render(request, "view_routes.html", {"routesWithPaths": routesWithPaths})
+
+
+@login_required
 def add_route_stop(request):
     routeStopName = ""
     message = ""
@@ -58,10 +69,15 @@ def add_route_stop(request):
     if request.method == "POST":
         routeStopName = request.POST.get("routeStopName")
         stopType = request.POST.get("stopType")
-        if RouteStop.objects.filter(name=routeStopName).exists():
+        if Stop.objects.filter(name=routeStopName).exists():
             message = f"Route stop {routeStopName} already exists!"
         else:
-            RouteStop.objects.create(name=routeStopName, stopType=stopType).save()
+            Stop.objects.create(
+                name=routeStopName,
+                type=stopType,
+                createdBy=request.user,
+                verified=False,
+            ).save()
             return redirect("add_route_stop")
     return render(
         request,
@@ -72,7 +88,9 @@ def add_route_stop(request):
 
 @login_required
 def add_route(request):
-    routeStops = RouteStop.objects.exclude(stopType=StopTypes.INTERMEDIATE_STOP)
+    routeStops = Stop.objects.filter(
+        Q(verified=True) | Q(createdBy=request.user)
+    ).exclude(type=StopTypes.INTERMEDIATE_STOP)
 
     if request.method == "POST":
         sourceId = request.POST.get("source")
@@ -90,12 +108,29 @@ def add_route(request):
                         "destinationId": destinationId,
                     },
                 )
-            source = RouteStop.objects.get(id=sourceId)
-            destination = RouteStop.objects.get(id=destinationId)
+
+            if Route.objects.filter(
+                source=sourceId, destination=destinationId
+            ).exists():
+                return render(
+                    request,
+                    "add_route.html",
+                    {
+                        "route_stops": routeStops,
+                        "message": "This route already exists",
+                        "sourceId": sourceId,
+                        "destinationId": destinationId,
+                    },
+                )
+
+            source = Stop.objects.get(id=sourceId)
+            destination = Stop.objects.get(id=destinationId)
 
             Route.objects.create(
                 source=source,
                 destination=destination,
+                createdBy=request.user,
+                verified=False,
             )
 
             return render(
@@ -106,10 +141,14 @@ def add_route(request):
     return render(request, "add_route.html", {"route_stops": routeStops})
 
 
+def add_intermediate_stop(request):
+    return render(request, "add_intermediate_stop.html")
+
+
 @login_required
 def add_route_links(request, routeId):
     route = Route.objects.get(id=routeId)
-    stops = RouteStop.objects.all()
+    stops = Stop.objects.all()
     last_stop = route.source
     modes = ModesOfTravel.choices
 
@@ -131,8 +170,8 @@ def add_route_links(request, routeId):
             + 1
         )
 
-        start = RouteStop.objects.get(id=startId)
-        last_stop = end = RouteStop.objects.get(id=endId)
+        start = Stop.objects.get(id=startId)
+        last_stop = end = Stop.objects.get(id=endId)
         distance = float(distance)
         price = float(price)
         TemporaryRouteLink.objects.create(
@@ -191,7 +230,7 @@ def add_route_links(request, routeId):
 def remove_route_link(request, routeLinkId, routeId):
     route = Route.objects.get(id=routeId)
     last_stop = route.source
-    stops = RouteStop.objects.all()
+    stops = Stop.objects.all()
     modes = ModesOfTravel.choices
     if TemporaryRouteLink.objects.filter(id=routeLinkId).exists():
         TemporaryRouteLink.objects.filter(id=routeLinkId).delete()
@@ -242,7 +281,7 @@ def save_route_links(request, routeId):
                 "add_route_links.html",
                 {
                     "route": route,
-                    "stops": RouteStop.objects.all(),
+                    "stops": Stop.objects.all(),
                     "modes": ModesOfTravel.choices,
                     "routeLinks": temporaryRouteLinks,
                     "message": "Duplicate Route Exists",
@@ -263,16 +302,6 @@ def save_route_links(request, routeId):
 
     TemporaryRouteLink.objects.filter(route=routeId).delete()
     return redirect("view_routes")
-
-
-@login_required
-def view_routes(request):
-    routes = Route.objects.all()
-    routesWithLinks = []
-    for route in routes:
-        routeLinks = RouteLink.objects.filter(route=route)
-        routesWithLinks.append({"route": route, "routeLinks": routeLinks})
-    return render(request, "view_routes.html", {"routesWithLinks": routesWithLinks})
 
 
 @login_required

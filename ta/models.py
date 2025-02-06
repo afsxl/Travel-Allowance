@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.timezone import now
+from django.contrib.auth.models import User
 
 
 class StopTypes(models.IntegerChoices):
@@ -15,44 +16,45 @@ class ModesOfTravel(models.IntegerChoices):
     WALK = 4, "Walk"
 
 
-class RouteStop(models.Model):
+class Stop(models.Model):
     name = models.CharField(max_length=255, unique=True, null=False)
-    stopType = models.IntegerField(choices=StopTypes.choices, null=False)
+    type = models.IntegerField(choices=StopTypes.choices, null=False)
+    createdBy = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
+    verified = models.BooleanField(default=False)
 
 
 class Route(models.Model):
     source = models.ForeignKey(
-        RouteStop, on_delete=models.CASCADE, null=False, related_name="routeSource"
+        Stop, on_delete=models.CASCADE, null=False, related_name="routeSource"
     )
     destination = models.ForeignKey(
-        RouteStop, on_delete=models.CASCADE, null=False, related_name="routeDestination"
+        Stop, on_delete=models.CASCADE, null=False, related_name="routeDestination"
     )
-    createdAt = models.DateTimeField(default=now)
-
-
-class TemporaryRouteLink(models.Model):
-    route = models.ForeignKey(Route, on_delete=models.CASCADE)
-    start = models.ForeignKey(
-        RouteStop, on_delete=models.CASCADE, related_name="temporaryRouteLinkStart"
-    )
-    end = models.ForeignKey(
-        RouteStop, on_delete=models.CASCADE, related_name="temporaryRouteLinkEnd"
-    )
-    distance = models.DecimalField(max_digits=6, decimal_places=2, default=0.0)
-    mode = models.IntegerField(choices=ModesOfTravel.choices, null=False)
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    order = models.IntegerField(null=False)
+    createdBy = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
+    verified = models.BooleanField(default=False)
 
 
 class RouteLink(models.Model):
-    route = models.ForeignKey(Route, on_delete=models.CASCADE)
     start = models.ForeignKey(
-        RouteStop, on_delete=models.CASCADE, related_name="routeLinkStart"
+        Stop, on_delete=models.CASCADE, related_name="routeLinkStart"
     )
-    end = models.ForeignKey(
-        RouteStop, on_delete=models.CASCADE, related_name="routeLinkEnd"
-    )
-    distance = models.DecimalField(max_digits=6, decimal_places=2, default=0.0)
+    end = models.ForeignKey(Stop, on_delete=models.CASCADE, related_name="routeLinkEnd")
+    distance = models.DecimalField(max_digits=6, decimal_places=2, null=False)
     mode = models.IntegerField(choices=ModesOfTravel.choices, null=False)
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    price = models.DecimalField(max_digits=10, decimal_places=2, null=False)
+    createdBy = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
+    verified = models.BooleanField(default=False)
+
+
+class RoutePath(models.Model):
+    route = models.ForeignKey(Route, on_delete=models.CASCADE, null=False)
+    routeLink = models.ForeignKey(RouteLink, on_delete=models.CASCADE, null=False)
+    order = models.IntegerField(null=False)
+    createdBy = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
+    verified = models.BooleanField(default=False)
+
+
+class TemperoryRoutePath(models.Model):
+    route = models.ForeignKey(Route, on_delete=models.CASCADE, null=False)
+    routeLink = models.ForeignKey(RouteLink, on_delete=models.CASCADE, null=False)
     order = models.IntegerField(null=False)

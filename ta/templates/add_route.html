@@ -10,7 +10,7 @@
         {% csrf_token %}
 
         <div class="form-group">
-            <label for="source">Source {{ sourceId }}</label>
+            <label for="source">Source</label>
             <select name="source" id="source" class="form-control" required>
                 {% if not sourceId %}
                 <option value="" disabled selected>-- Select Source --</option>
