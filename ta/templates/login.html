@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,11 +17,13 @@
             align-items: center;
             height: 100vh;
         }
+
         h2 {
             color: #333;
             text-align: center;
             font-weight: 600;
         }
+
         form {
             background: white;
             padding: 30px;
@@ -30,12 +33,14 @@
             width: 100%;
             box-sizing: border-box;
         }
+
         label {
             font-size: 14px;
             color: #555;
             display: block;
             margin-bottom: 8px;
         }
+
         input[type="text"],
         input[type="password"] {
             width: 100%;
@@ -47,12 +52,14 @@
             box-sizing: border-box;
             transition: all 0.3s ease;
         }
+
         input[type="text"]:focus,
         input[type="password"]:focus {
             border-color: #007bff;
             outline: none;
             box-shadow: 0 0 8px rgba(0, 123, 255, 0.1);
         }
+
         button {
             background-color: #007bff;
             color: white;
@@ -64,6 +71,7 @@
             font-size: 16px;
             transition: background-color 0.3s ease;
         }
+
         button:hover {
             background-color: #0056b3;
         }
@@ -84,26 +92,29 @@
             text-align: center;
             margin-top: 20px;
         }
+
         .create-account a {
             color: #007bff;
             text-decoration: none;
         }
+
         .create-account a:hover {
             text-decoration: underline;
         }
     </style>
 </head>
+
 <body>
 
     <form method="post" action="{% url 'login' %}">
         <h2>Login to Your Account</h2>
 
         {% if messages %}
-            <ul>
-                {% for message in messages %}
-                    <li class="error-message">{{ message }}</li>
-                {% endfor %}
-            </ul>
+        <ul>
+            {% for message in messages %}
+            <li class="error-message">{{ message }}</li>
+            {% endfor %}
+        </ul>
         {% endif %}
 
 
@@ -123,4 +134,5 @@
     </form>
 
 </body>
+
 </html>

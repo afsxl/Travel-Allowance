@@ -22,10 +22,10 @@
                     Price : {{ routePath.price }}
                 </span>
             </div>
-            <a href="{% url 'add_route_links' routeWithPaths.route.id %}" class="btn btn-info">Edit Route Links</a>
+            <a href="{% url 'add_route_path' routeWithPaths.route.id %}" class="btn btn-info">Edit Route Path</a>
             {% endfor %}
             {% else %}
-            <a href="{% url 'add_route_links' routeWithPaths.route.id %}" class="btn btn-info">Add Route Links</a>
+            <a href="{% url 'add_route_path' routeWithPaths.route.id %}" class="btn btn-info">Add Route Path</a>
             {% endif %}
         </div>
         {% endfor %}

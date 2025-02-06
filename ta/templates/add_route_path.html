@@ -4,14 +4,22 @@
 
 {% block content %}
 <div class="container">
-    <h1>Add Route Path for Route: {{ route.name }}</h1>
+    <h1>
+        Add Route Path for Route
+    </h1>
+    <h3>
+        {{ route.source.name }} To {{ route.destination.name }}
+    </h3>
+
     <form method="POST">
         {% csrf_token %}
         <div class="form-group">
             <label for="route_link_id">Route Link</label>
             <select name="route_link_id" class="form-control">
-                {% for link in route_links %}
-                <option value="{{ link.id }}">{{ link.start }} to {{ link.end }} ({{ link.mode }})</option>
+                {% for routeLink in routeLinks %}
+                <option value="{{ link.id }}">
+                    {{ routeLink.start.name }} to {{ routeLink.end.name }} ({{ routeLink.get_mode_display }})
+                </option>
                 {% endfor %}
             </select>
         </div>
@@ -19,8 +27,27 @@
             <label for="order">Order</label>
             <input type="number" name="order" class="form-control" min="1" required>
         </div>
-        <button type="submit" class="btn btn-primary">Add Path</button>
+        <div class="btn-class">
+            <button type="submit" class="btn btn-primary">Add Path</button>
+        </div>
     </form>
+    <div id="route-list" class="route-list">
+        {% for routeLink in routeLinks %}
+        <div class="route-item">
+            <span>Start : {{ routeLink.start.name }} ,
+                End : {{ routeLink.end.name }} ,
+                Mode Of Travel : {{ routeLink.get_mode_display }} ,
+                Distance : {{ routeLink.distance }} ,
+                Price : {{ routeLink.price }}</span>
+            <div>
+                <a class="delete-btn" href="{% url 'remove_route_link' routeLink.id route.id %}">Delete</a>
+            </div>
+        </div>
+        {% endfor %}
+        <div class="btn-class">
+            <button type="submit" class="btn btn-primary">Save Path</button>
+        </div>
+    </div>
 </div>
 
 <style>
@@ -33,7 +60,8 @@
         margin: 0 auto;
     }
 
-    h1 {
+    h1,
+    h3 {
         text-align: center;
         color: #333;
         margin-bottom: 20px;
@@ -41,6 +69,11 @@
 
     .form-group {
         margin-bottom: 15px;
+    }
+
+    .btn-class {
+        display: flex;
+        justify-content: center;
     }
 
     .btn {
@@ -54,6 +87,39 @@
 
     .btn:hover {
         background-color: #0056b3;
+    }
+
+    .route-list {
+        margin-top: 20px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        padding: 10px;
+        background-color:
+            #f8f9fa;
+    }
+
+    .route-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    .route-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .delete-btn {
+        background-color: #dc3545;
+        color:
+            white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .delete-btn:hover {
+        background-color: #c82333;
     }
 </style>
 {% endblock %}

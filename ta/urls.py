@@ -9,9 +9,7 @@ urlpatterns = [
     # Home
     path("home/", views.home_view, name="home"),
     path("add-route/", views.add_route, name="add_route"),
-    path(
-        "add-route-links/<int:routeId>/", views.add_route_links, name="add_route_links"
-    ),
+    path("add-route-path/<int:routeId>/", views.add_route_path, name="add_route_path"),
     path(
         "remove-route-link/<int:routeLinkId>/<int:routeId>",
         views.remove_route_link,
@@ -24,16 +22,8 @@ urlpatterns = [
     ),
     path("view-routes/", views.view_routes, name="view_routes"),
     path("add-route-stop/", views.add_route_stop, name="add_route_stop"),
-    path(
-        "add-intermediate-stop/",
-        views.add_intermediate_stop,
-        name="add_intermediate_stop",
-    ),
-    path(
-        "generate_report/",
-        views.generate_report,
-        name="generate_report",
-    ),
+    path("add-route-link/", views.add_route_link, name="add_route_link"),
+    path("generate_report/", views.generate_report, name="generate_report"),
 ]
 
 # Set the login URL to match your custom login page

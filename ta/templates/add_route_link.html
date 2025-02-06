@@ -4,8 +4,9 @@
 
 {% block content %}
 <div class="container">
-    <h1>Add New Intermediate Stop</h1>
-    <p>{{ message }}</p>
+    <h1>Add New Route Link</h1>
+    <p>{{ success }}</p>
+    <p>{{ error }}</p>
     <form method="POST">
         {% csrf_token %}
 
@@ -13,13 +14,13 @@
             <div class="col">
                 <label for="start">Start:</label>
                 <select id="start" name="start" required>
-                    {% if not last_stop %}
+                    {% if not start %}
                     <option value="" selected disabled>-- Select Start Location --</option>
                     {% else %}
                     <option value="" disabled>-- Select Start Location --</option>
                     {% endif %}
                     {% for stop in stops %}
-                    {% if last_stop.id == stop.id %}
+                    {% if start == stop.id|stringformat:"s" %}
                     <option value="{{ stop.id }}" selected>{{ stop.name }}</option>
                     {% else %}
                     <option value="{{ stop.id }}">{{ stop.name }}</option>
@@ -31,9 +32,17 @@
             <div class="col">
                 <label for="end">End:</label>
                 <select id="end" name="end" required>
+                    {% if not end %}
                     <option value="" selected disabled>-- Select End Location --</option>
+                    {% else %}
+                    <option value="" disabled>-- Select End Location --</option>
+                    {% endif %}
                     {% for stop in stops %}
+                    {% if end == stop.id|stringformat:"s" %}
+                    <option value="{{ stop.id }}" selected>{{ stop.name }}</option>
+                    {% else %}
                     <option value="{{ stop.id }}">{{ stop.name }}</option>
+                    {% endif %}
                     {% endfor %}
                 </select>
             </div>
@@ -43,26 +52,34 @@
             <div class="col">
                 <label for="mode">Mode:</label>
                 <select id="mode" name="mode" required>
+                    {% if not mode %}
                     <option value="" selected disabled>-- Select Mode Of Travel --</option>
+                    {% else %}
+                    <option value="" disabled>-- Select Mode Of Travel --</option>
+                    {% endif %}
                     {% for value, label in modes %}
+                    {% if mode == value|stringformat:"s" %}
+                    <option value="{{ value }}" selected>{{ label }}</option>
+                    {% else %}
                     <option value="{{ value }}">{{ label }}</option>
+                    {% endif %}
                     {% endfor %}
                 </select>
             </div>
 
             <div class="col">
                 <label for="distance">Distance (km):</label>
-                <input type="number" id="distance" name="distance" required>
+                <input type="number" id="distance" name="distance" value="{{ distance }}" required>
             </div>
 
             <div class="col">
                 <label for="price">Price:</label>
-                <input type="number" id="price" name="price" required>
+                <input type="number" id="price" name="price" value="{{ price }}" required>
             </div>
         </div>
 
         <div class="form-group text-center">
-            <button type="submit" id="add-route" class="btn btn-success">+ Add Route Link</button>
+            <button type="submit" id="add-route">Save Route Link</button>
         </div>
     </form>
 </div>
@@ -128,34 +145,17 @@
         outline: none;
     }
 
-    .btn {
-        padding: 10px;
-        font-size:
-            1.2rem;
-        border-radius: 6px;
-    }
-
-    .btn-success {
-        background-color: #28a745;
-        color: white;
-        border:
-            none;
-        transition: background-color 0.3s ease;
-    }
-
-    .btn-success:hover {
-        background-color: #218838;
-    }
-
-    .btn-primary {
+    button {
+        padding: 12px;
         background-color: #007bff;
         color: white;
         border: none;
-        transition:
-            background-color 0.3s ease;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
     }
 
-    .btn-primary:hover {
+    button:hover {
         background-color: #0056b3;
     }
 
