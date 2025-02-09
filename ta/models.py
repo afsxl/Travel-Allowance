@@ -15,8 +15,19 @@ class ModesOfTravel(models.IntegerChoices):
     WALK = 4, "Walk"
 
 
+class UserDetails(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
+    designation = models.CharField(max_length=255, null=False)
+    address = models.TextField(null=False)
+    basicPay = models.DecimalField(max_digits=12, decimal_places=2, null=False)
+    accountNumber = models.CharField(max_length=255, null=False)
+    ifscCode = models.CharField(max_length=255, null=False)
+    bankName = models.CharField(max_length=255, null=False)
+    branchName = models.CharField(max_length=255, null=False)
+
+
 class RouteStop(models.Model):
-    name = models.CharField(max_length=255, unique=True, null=False)
+    name = models.CharField(max_length=255, null=False)
     type = models.IntegerField(choices=StopTypes.choices, null=False)
     createdBy = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
     verified = models.BooleanField(default=False)
@@ -52,10 +63,46 @@ class RoutePath(models.Model):
     routeLink = models.ForeignKey(RouteLink, on_delete=models.CASCADE, null=False)
     order = models.IntegerField(null=False)
     createdBy = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
-    verified = models.BooleanField(default=False)
 
 
-class TemperoryRoutePath(models.Model):
+class TemporaryRoutePath(models.Model):
     route = models.ForeignKey(Route, on_delete=models.CASCADE, null=False)
     routeLink = models.ForeignKey(RouteLink, on_delete=models.CASCADE, null=False)
     order = models.IntegerField(null=False)
+    createdBy = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
+
+
+class JourneyRoute(models.Model):
+    source = models.ForeignKey(
+        RouteStop,
+        on_delete=models.CASCADE,
+        null=False,
+        related_name="journeyRouteSource",
+    )
+    destination = models.ForeignKey(
+        RouteStop,
+        on_delete=models.CASCADE,
+        null=False,
+        related_name="journeyRouteDestination",
+    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
+
+
+class JourneyRouteLink(models.Model):
+    start = models.ForeignKey(
+        RouteStop, on_delete=models.CASCADE, related_name="journeyRouteLinkStart"
+    )
+    end = models.ForeignKey(
+        RouteStop, on_delete=models.CASCADE, related_name="journeyRouteLinkEnd"
+    )
+    distance = models.DecimalField(max_digits=6, decimal_places=2, null=False)
+    mode = models.IntegerField(choices=ModesOfTravel.choices, null=False)
+    price = models.DecimalField(max_digits=10, decimal_places=2, null=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
+
+
+class JourneyRoutePath(models.Model):
+    route = models.ForeignKey(Route, on_delete=models.CASCADE, null=False)
+    routeLink = models.ForeignKey(RouteLink, on_delete=models.CASCADE, null=False)
+    order = models.IntegerField(null=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False)

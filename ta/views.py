@@ -75,7 +75,9 @@ def add_route_stop(request):
 
         print(type(stopType))
 
-        if RouteStop.objects.filter(name=routeStopName).exists():
+        if RouteStop.objects.filter(
+            Q(name=routeStopName) & (Q(verified=True) | Q(createdBy=request.user))
+        ).exists():
             error = f"Route stop {routeStopName} already exists!"
         else:
             RouteStop.objects.create(
@@ -119,7 +121,9 @@ def add_route(request):
             if sourceId == destinationId:
                 error = "Source and Destination are same"
             elif Route.objects.filter(
-                source=sourceId, destination=destinationId
+                Q(source=sourceId)
+                & Q(destination=destinationId)
+                & (Q(verified=True) | Q(createdBy=request.user))
             ).exists():
                 error = "This route already exists"
             else:
@@ -173,7 +177,9 @@ def add_route_link(request):
             error = "Invalid Distance"
         elif float(price) < 1:
             error = "Invalid Price"
-        elif RouteLink.objects.filter(start=start, end=end).exists():
+        elif RouteLink.objects.filter(
+            Q(start=start) & Q(end=end) & (Q(verified=True) | Q(createdBy=request.user))
+        ).exists():
             error = "Route Link Already Exists"
         else:
             start = RouteStop.objects.get(id=start)
@@ -215,97 +221,164 @@ def add_route_link(request):
 def add_route_path(request, routeId):
     route = Route.objects.get(id=routeId)
     routeLinks = RouteLink.objects.filter(Q(verified=True) | Q(createdBy=request.user))
-    routePaths = RoutePath.objects.filter(route=routeId)
+    routePaths = RoutePath.objects.filter(route=routeId).order_by("order")
+
+    if request.method == "POST":
+        routeLinkId = request.POST.get("routeLinkId")
+        routeLink = RouteLink.objects.get(id=routeLinkId)
+        TemporaryRoutePath.objects.create(
+            route=route,
+            routeLink=routeLink,
+            order=1 if routePaths.count() == 0 else routePaths.last().order + 1,
+            createdBy=request.user,
+        )
+    else:
+        TemporaryRoutePath.objects.filter(
+            route=routeId, createdBy=request.user
+        ).delete()
+        for routePath in routePaths:
+            TemporaryRoutePath.objects.create(
+                route=routePath.route,
+                routeLink=routePath.routeLink,
+                order=routePath.order,
+                createdBy=request.user,
+            )
+
+    routePaths = TemporaryRoutePath.objects.filter(route=routeId).order_by("order")
 
     return render(
         request,
         "add_route_path.html",
-        {
-            "route": route,
-            "routeLinks": routeLinks,
-        },
+        {"route": route, "routeLinks": routeLinks, "routePaths": routePaths},
     )
 
 
 @login_required
-def remove_route_link(request, routeLinkId, routeId):
+def remove_route_path(request, routePathId, routeId):
     route = Route.objects.get(id=routeId)
-    last_stop = route.source
-    stops = RouteStop.objects.all()
-    modes = ModesOfTravel.choices
-    if TemporaryRouteLink.objects.filter(id=routeLinkId).exists():
-        TemporaryRouteLink.objects.filter(id=routeLinkId).delete()
-    routeLinks = TemporaryRouteLink.objects.filter(route=route).order_by("order")
-    if routeLinks.count():
-        last_stop = routeLinks.last().end
+    routeLinks = RouteLink.objects.filter(Q(verified=True) | Q(createdBy=request.user))
+    routePaths = TemporaryRoutePath.objects.filter(route=routeId).order_by("order")
+
+    if TemporaryRoutePath.objects.filter(id=routePathId).exists():
+        TemporaryRoutePath.objects.filter(id=routePathId).delete()
 
     return render(
         request,
-        "add_route_links.html",
-        {
-            "route": route,
-            "stops": stops,
-            "last_stop": last_stop,
-            "modes": modes,
-            "routeLinks": routeLinks,
-        },
+        "add_route_path.html",
+        {"route": route, "routeLinks": routeLinks, "routePaths": routePaths},
     )
 
 
-def save_route_links(request, routeId):
-    currentRoute = Route.objects.get(id=routeId)
-    sameRoutes = Route.objects.filter(
-        source=currentRoute.source, destination=currentRoute.destination
-    ).exclude(id=routeId)
+@login_required
+def save_all_route_path(request, routeId):
+    route = Route.objects.get(id=routeId)
 
-    temporaryRouteLinks = TemporaryRouteLink.objects.filter(route=routeId).order_by(
-        "order"
-    )
+    RoutePath.objects.filter(route=route, createdBy=request.user).delete()
 
-    for route in sameRoutes:
-        routeLinks = RouteLink.objects.filter(route=route).order_by("order")
-        if routeLinks.count() != temporaryRouteLinks.count():
-            continue
-        duplicate = True
-        for routeLink, temporaryRouteLink in zip(routeLinks, temporaryRouteLinks):
-            if (
-                routeLink.start != temporaryRouteLink.start
-                or routeLink.end != temporaryRouteLink.end
-                or routeLink.distance != temporaryRouteLink.distance
-                or routeLink.price != temporaryRouteLink.price
-            ):
-                duplicate = False
-                break
-        if duplicate:
-            return render(
-                request,
-                "add_route_links.html",
-                {
-                    "route": route,
-                    "stops": RouteStop.objects.all(),
-                    "modes": ModesOfTravel.choices,
-                    "routeLinks": temporaryRouteLinks,
-                    "message": "Duplicate Route Exists",
-                },
-            )
+    temporaryRoutePaths = TemporaryRoutePath.objects.filter(
+        route=route, createdBy=request.user
+    ).order_by("order")
 
-    RouteLink.objects.filter(route=routeId).delete()
-    for index, temporaryRouteLink in enumerate(temporaryRouteLinks):
-        RouteLink.objects.create(
-            route=temporaryRouteLink.route,
-            start=temporaryRouteLink.start,
-            end=temporaryRouteLink.end,
-            mode=temporaryRouteLink.mode,
-            distance=temporaryRouteLink.distance,
-            price=temporaryRouteLink.price,
+    for index, temporaryRoutePath in enumerate(temporaryRoutePaths):
+        RoutePath.objects.create(
+            route=temporaryRoutePath.route,
+            routeLink=temporaryRoutePath.routeLink,
+            createdBy=request.user,
             order=index + 1,
         )
 
-    TemporaryRouteLink.objects.filter(route=routeId).delete()
+    TemporaryRoutePath.objects.filter(route=route, createdBy=request.user).delete()
     return redirect("view_routes")
 
 
 @login_required
+def add_route_to_journey(request, routeId):
+    route = Route.objects.get(id=routeId)
+    return render(request, "add_journey.html")
+
+
+@login_required
 def generate_report(request):
-    routes = Route.objects.all()
-    return render(request, "generate_report.html", {"routes": routes})
+    report_data = [
+        {
+            "departure_station": "Tvm",
+            "departure_date": "10/05/2024",
+            "departure_time": "10:00 AM",
+            "arrival_station": "Kochi",
+            "arrival_date": "11/05/2024",
+            "arrival_time": "11:30 AM",
+            "distance": "125",
+            "mode": "Train",
+            "fare": "250/-",
+            "incidential_expense": "565/-",
+            "da": "200/-",
+            "total": "1500/-",
+            "purpose": "Exam Duty",
+            "remarks": "Some remarks",
+        },
+        {
+            "departure_station": "Kochi",
+            "departure_date": "15/05/2024",
+            "departure_time": "9:15 AM",
+            "arrival_station": "Thrissur",
+            "arrival_date": "15/05/2024",
+            "arrival_time": "10:45 AM",
+            "distance": "85",
+            "mode": "Bus",
+            "fare": "150/-",
+            "incidential_expense": "200/-",
+            "da": "100/-",
+            "total": "750/-",
+            "purpose": "Official Meeting",
+            "remarks": "Urgent work",
+        },
+        {
+            "departure_station": "Thrissur",
+            "departure_date": "20/05/2024",
+            "departure_time": "2:30 PM",
+            "arrival_station": "Calicut",
+            "arrival_date": "20/05/2024",
+            "arrival_time": "5:00 PM",
+            "distance": "120",
+            "mode": "Taxi",
+            "fare": "1200/-",
+            "incidential_expense": "300/-",
+            "da": "250/-",
+            "total": "2250/-",
+            "purpose": "Seminar",
+            "remarks": "Approved by Manager",
+        },
+        {
+            "departure_station": "Calicut",
+            "departure_date": "25/05/2024",
+            "departure_time": "6:45 AM",
+            "arrival_station": "Kannur",
+            "arrival_date": "25/05/2024",
+            "arrival_time": "8:30 AM",
+            "distance": "90",
+            "mode": "Train",
+            "fare": "180/-",
+            "incidential_expense": "120/-",
+            "da": "150/-",
+            "total": "950/-",
+            "purpose": "Inspection",
+            "remarks": "Pending reimb/-ement",
+        },
+        {
+            "departure_station": "Kannur",
+            "departure_date": "30/05/2024",
+            "departure_time": "11:00 AM",
+            "arrival_station": "Kasargod",
+            "arrival_date": "30/05/2024",
+            "arrival_time": "12:30 PM",
+            "distance": "75",
+            "mode": "Bus",
+            "fare": "90/-",
+            "incidential_expense": "50/-",
+            "da": "100/-",
+            "total": "500/-",
+            "purpose": "Training Session",
+            "remarks": "Completed successfully",
+        },
+    ]
+    return render(request, "generate_report.html", {"report_data": report_data})

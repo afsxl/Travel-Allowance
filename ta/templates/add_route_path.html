@@ -11,41 +11,40 @@
         {{ route.source.name }} To {{ route.destination.name }}
     </h3>
 
-    <form method="POST">
+    <form method="POST" action="{% url 'add_route_path' route.id %}">
         {% csrf_token %}
         <div class="form-group">
             <label for="route_link_id">Route Link</label>
-            <select name="route_link_id" class="form-control">
+            <select name="routeLinkId" class="form-control" required>
+                <option value="" selected disabled>-- Select Route Link --</option>
                 {% for routeLink in routeLinks %}
-                <option value="{{ link.id }}">
+                <option value="{{ routeLink.id }}">
                     {{ routeLink.start.name }} to {{ routeLink.end.name }} ({{ routeLink.get_mode_display }})
                 </option>
                 {% endfor %}
             </select>
-        </div>
-        <div class="form-group">
-            <label for="order">Order</label>
-            <input type="number" name="order" class="form-control" min="1" required>
         </div>
         <div class="btn-class">
             <button type="submit" class="btn btn-primary">Add Path</button>
         </div>
     </form>
     <div id="route-list" class="route-list">
-        {% for routeLink in routeLinks %}
+        {% for routePath in routePaths %}
         <div class="route-item">
-            <span>Start : {{ routeLink.start.name }} ,
-                End : {{ routeLink.end.name }} ,
-                Mode Of Travel : {{ routeLink.get_mode_display }} ,
-                Distance : {{ routeLink.distance }} ,
-                Price : {{ routeLink.price }}</span>
+            <span>
+                Start : {{ routePath.routeLink.start.name }} ,
+                End : {{ routePath.routeLink.end.name }} ,
+                Mode Of Travel : {{ routePath.routeLink.get_mode_display }} ,
+                Distance : {{ routePath.routeLink.distance }} ,
+                Price : {{ routePath.routeLink.price }}
+            </span>
             <div>
-                <a class="delete-btn" href="{% url 'remove_route_link' routeLink.id route.id %}">Delete</a>
+                <a class="delete-btn" href="{% url 'remove_route_path' routePath.id route.id %}">Delete</a>
             </div>
         </div>
         {% endfor %}
         <div class="btn-class">
-            <button type="submit" class="btn btn-primary">Save Path</button>
+            <a href="{% url 'save_all_route_path' route.id %}" class="btn btn-primary">Save All Path</a>
         </div>
     </div>
 </div>
@@ -72,6 +71,7 @@
     }
 
     .btn-class {
+        padding: 10px;
         display: flex;
         justify-content: center;
     }
@@ -100,8 +100,12 @@
 
     .route-item {
         display: flex;
-        justify-content: space-between;
-        margin-bottom: 10px;
+        margin-top: 20px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        padding: 10px;
+        background-color:
+            #f8f9fa;
     }
 
     .route-item:last-child {

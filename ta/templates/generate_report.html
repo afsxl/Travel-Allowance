@@ -2,140 +2,309 @@
 {% load static %}
 {% block title%}AddLinks{%endblock%}
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/pdfGenerate.css' %}" />
+
+<style>
+	.report-container {
+		display: flex;
+		flex-direction: column;
+		gap: 0;
+	}
+
+	h2 {
+		font-size: 16px;
+		text-align: center;
+	}
+
+	.table-1 tr>td {
+		text-align: start !important;
+	}
+
+	.table-1 tr,
+	.table-1 tr td {
+		border: none;
+	}
+
+	.table-1 {
+		border-bottom: none !important;
+
+	}
+
+	.table-1,
+	.table-2 {
+		border-collapse: collapse;
+		margin: 0;
+		padding: 0;
+		width: 100%;
+		table-layout: fixed;
+		border: 1px solid #000;
+	}
+
+	.table-2 td {
+		border: 1px solid #000;
+	}
+
+	.table-1 tr>td {
+		font-size: 13px;
+		word-wrap: break-word;
+		text-align: center;
+	}
+
+	.table-2 tr>td {
+		font-size: 11px;
+		word-wrap: break-word;
+		text-align: center;
+		height: 65px;
+		padding: none;
+		margin: none;
+	}
+
+	.vertical-text {
+		writing-mode: vertical-rl;
+		text-align: center;
+		transform: rotate(180deg);
+		padding: 10px;
+		max-height: 100px;
+	}
+
+	.consent {
+		line-height: 2rem;
+		font-size: 14px;
+		margin-top: 1rem;
+	}
+
+	.consent>div {
+		flex: 1;
+		display: flex;
+		place-items: center;
+		gap: 3rem;
+	}
+
+	.consent>div>span {
+		display: flex;
+		place-items: center;
+		height: 60px;
+		width: 30%;
+		justify-content: center;
+		gap: 1rem;
+	}
+
+	.signature-field {
+		flex: 1;
+		height: 60px;
+		width: 100%;
+		border: 1px solid #000;
+	}
+
+	.consent>div>span>p {
+		margin-top: 15px !important;
+
+	}
+
+	.consent>span>span {
+		display: flex;
+		justify-content: space-between;
+		place-items: center;
+		width: 50%;
+		gap: 1rem;
+		margin-bottom: 1rem;
+
+	}
+
+	.consent>span {
+		display: flex;
+		place-items: center;
+		justify-content: space-between;
+		width: 52%;
+		gap: 1rem;
+		margin-bottom: 1rem;
+	}
+
+	@media print {
+		@page {
+			size: landscape;
+		}
+
+		body * {
+			visibility: hidden;
+		}
+
+		#pdfToPrint,
+		#pdfToPrint * {
+			visibility: visible;
+		}
+
+		#pdfToPrint {
+			width: 100%;
+		}
+
+		.table-1,
+		.table-2 {
+			width: 100%;
+			table-layout: fixed;
+			border-collapse: collapse;
+			border: 1px solid #000;
+		}
+
+		.table-1 tr,
+		.table-1 tr td {
+			border: none !important;
+		}
+
+		.table-1 {
+			border-bottom: none !important;
+		}
+
+		.table-1 tr>td {
+			text-align: start !important;
+		}
+
+		.table-2 td {
+			border: 1px solid #000 !important;
+		}
+
+		.table-1>td {
+			font-size: 13px;
+			word-wrap: break-word;
+			text-align: center;
+		}
+
+		.table-2 td {
+			font-size: 10px;
+			text-align: center;
+		}
+
+	}
+</style>
+
+
+
 <section class="report-container" id="pdfToPrint">
-	<label class="report-container-heading">STATE INSTITUTE OF TEACHERS TRAINING AND RESEARCH KALAMASSERY</label>
-	<div class="report-container-col-1">
-		<label>Course Title:</label>
-		<label>Course Code:</label>
-	</div>
-	<div class="report-container-col-2">
-		<span>
-			<label>Head Quarters:</label>
-		</span>
-		<span>
-			<label>Name In Capital Letters:</label>
-			<label>Designation:</label>
-			<label>Address:</label>
-		</span>
-		<span>
-			<label>Basic Pay:</label>
-			<label>A/C No & IFSC Code:</label>
-			<label>Bank/Branch:</label>
-		</span>
-		<span>
-			<label>Allowance:</label>
-		</span>
-	</div>
-	<div class="report-container-col-3">
-		<span>
-			<label>Departure</label>
-			<label>Arrival</label>
-		</span>
-		<span></span>
-	</div>
-	<div class="report-container-col-4">
-		<span>
-			<div>
-				<label>Station</label>
-				<label>Date</label>
-				<label>Time</label>
-			</div>
-			<div>
-				<label>Station</label>
-				<label>Date</label>
-				<label>Time</label>
-			</div>
-		</span>
-		<span>
-			<p>Distance <br />(KM)</p>
-			<p>Distance <br />(KM)</p>
-			<p>
-				Mode of<br />
-				Journey <br />Rail/Road
-			</p>
-			<p>Fare (Rs)</p>
-			<p>
-				Incidential<br />
-				Expense<br />(Rs)
-			</p>
-			<p>
-				DA for<br />
-				halt (Rs)
-			</p>
-			<p>
-				Total<br />
-				Amount <br />(Rs)
-			</p>
-			<p>
-				Purpose of<br />
-				Journey
-			</p>
-			<p>Remarks</p>
-		</span>
-	</div>
-	<div class="report-container-col-5">
+	<h2 class="header">STATE INSTITUTE OF TECHNICAL TEACHERS TRAINING & RESEARCH, KALAMASSERY</h2>
+	<table border="1" width="100%" class="table-1">
+		<tr>
+			<td>Head Quarters:</td>
+			<td>Name in Capital letters:</td>
+			<td>Basic Pay:</td>
+			<td>Allowance:</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>Designation:</td>
+			<td colspan="2">A/C No. & IFSC Code:</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>Address:</td>
+			<td colspan="2">Bank/Branch:</td>
+		</tr>
+	</table>
+	<table border="1" width="100%" class="table-2">
+		<tr>
+			<td colspan="3" width="25.5%" align="center"><b>Departure</b></td>
+			<td colspan="3" width="25.5%" align="center"><b>Arrival</b></td>
+			<td colspan="8"></td>
+		</tr>
+		<tr>
+			<td>Station</td>
+			<td>Date</td>
+			<td>Time</td>
+			<td>Station</td>
+			<td>Date</td>
+			<td>Time</td>
+			<td class="vertical-text">Distance<br>(km)</td>
+			<td class="vertical-text">Mode of<br> journey <br>Rail/Road</td>
+			<td class="vertical-text">Fare(Rs)</td>
+			<td class="vertical-text">Incidental<br> Expense<br>(Rs)</td>
+			<td class="vertical-text">DA for <br>halt(Rs)</td>
+			<td class="vertical-text">Total<br> Amount<br>(Rs)</td>
+			<td class="vertical-text">Purpose of<br> Journey</td>
+			<td class="vertical-text">Remarks</td>
+		</tr>
+		{% if report_data %}
+		{% for item in report_data %}
+		<tr>
+			<td>{{ item.departure_station }}</td>
+			<td>{{ item.departure_date }}</td>
+			<td>{{ item.departure_time }}</td>
+			<td>{{ item.arrival_station }}</td>
+			<td>{{ item.arrival_date }}</td>
+			<td>{{ item.arrival_time }}</td>
+			<td>{{ item.distance }}</td>
+			<td>{{ item.mode }}</td>
+			<td>{{ item.fare }}</td>
+			<td>{{ item.incidential_expense }}</td>
+			<td>{{ item.da }}</td>
+			<td>{{ item.total }}</td>
+			<td class="vertical-text">{{ item.purpose }}</td>
+			<td class="vertical-text">{{ item.remarks }}</td>
+		</tr>
+		{% endfor %}
+		{% else %}
+		<tr>
+			<td colspan="14" style="text-align: center;">No report data available</td>
+		</tr>
+		{% endif %}
+		<tr>
+			<td>TOTAL</td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+
+		</tr>
+	</table>
+	<div class="consent">
+		<p>Certified that i have performed journey from ...................................................... to
+			...................................................... by
+			......................................................and <br> From
+			...................................................... to
+			......................................................
+			by ......................................................</p>
+		<p>Certified that i will perform journey from ............................................................ to
+			...................................................... by
+			......................................................and <br> From
+			...................................................... to
+			......................................................
+			by ......................................................</p>
 		<div>
+			<p>Recieved from the Joint Director, State Institute of Technical Teachers Training & <br>
+				Research,Kalamassery
+				An amount of &#8377;........................./-
+				(Rupees.........................<br>........................................................................................................only)
+				being<br>
+			</p>
 			<span>
-				<div>
-					<label></label>
-					<label></label>
-					<label></label>
-				</div>
-				<div>
-					<label></label>
-					<label></label>
-					<label></label>
-				</div>
-			</span>
-			<span>
-				<p></p>
-				<p></p>
-				<p></p>
-				<p></p>
-				<p></p>
-				<p></p>
-				<p></p>
-				<p></p>
-				<p></p>
+				<p>Signature of the Officer:</p>
+				<span class="signature-field"></span>
 			</span>
 		</div>
-
+		<p>My TA & DA for attending the Faculty Development Programme mentioned above.</p>
+		<span>
+			<span>
+				<p>Signature:</p>
+				<span class="signature-field"></span>
+			</span>
+			<p>Signature of Joint Director:</p>
+		</span>
 	</div>
 </section>
 
-{% comment %} <button id="downloadPdfBtn">Download PDF</button> {% endcomment %}
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<button id="printReportBtn">Print Report</button>
 
 <script>
 	document
-		.getElementById("downloadPdfBtn")
+		.getElementById("printReportBtn")
 		.addEventListener("click", function () {
-			const { jsPDF } = window.jspdf;
-			const pdf = new jsPDF("l", "mm", "a4"); // Landscape A4
-			const element = document.getElementById("pdfToPrint");
-
-			html2canvas(element, { scale: 2 }).then((canvas) => {
-				const imgData = canvas.toDataURL("image/png");
-
-				// A4 Page Dimensions (landscape)
-				const pageWidth = 297; // A4 width in mm (landscape)
-				const pageHeight = 210; // A4 height in mm (landscape)
-
-				// Image Dimensions
-				const imgWidth = pageWidth - 20; // Scale width to fit A4 width
-				const imgHeight = (canvas.height * imgWidth) / canvas.width; // Maintain aspect ratio
-
-				// Calculate center position
-				const x = (pageWidth - imgWidth) / 2; // Center horizontally
-				const y = (pageHeight - imgHeight) / 4; // Center vertically
-
-				// Add image to PDF at calculated position
-				pdf.addImage(imgData, "PNG", x, y, imgWidth, imgHeight);
-				pdf.save("download.pdf");
-			});
+			window.print();
 		});
 </script>
 

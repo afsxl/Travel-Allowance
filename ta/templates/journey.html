@@ -22,15 +22,12 @@
                 </span>
             </div>
             {% endfor %}
-
             {% if not routeWithPaths.route.verified %}
             <a href="{% url 'add_route_path' routeWithPaths.route.id %}" class="btn btn-info">Edit Route Path</a>
             {% endif %}
             {% else %}
             <a href="{% url 'add_route_path' routeWithPaths.route.id %}" class="btn btn-info">Add Route Path</a>
             {% endif %}
-            <a href="{% url 'add_route_to_journey' routeWithPaths.route.id %}" class="btn btn-info">Add Route To
-                Journey</a>
         </div>
         {% endfor %}
     </div>
