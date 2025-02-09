@@ -32,7 +32,7 @@ def signup_view(request):
             user = form.save()
             login(request, user)
             messages.success(request, "Account created successfully!")
-            return redirect("home")
+            return redirect("view_profile")
         else:
             messages.error(request, "Please correct the errors below.")
     else:
@@ -49,6 +49,55 @@ def logout_view(request):
 def home_view(request):
     routes = Route.objects.all()
     return render(request, "home.html", {"routes": routes})
+
+
+def view_profile(request):
+    if request.method == "POST":
+        firstName = request.POST.get("first_name")
+        lastName = request.POST.get("last_name")
+        designation = request.POST.get("designation")
+        basicPay = request.POST.get("basic_pay")
+        accountNumber = request.POST.get("account_number")
+        ifscCode = request.POST.get("ifsc_code")
+        bankName = request.POST.get("bank_name")
+        branchName = request.POST.get("branch_name")
+
+        User.objects.filter(id=request.user.id).update(
+            first_name=firstName, last_name=lastName
+        )
+
+        UserDetails.objects.update_or_create(
+            user=request.user,
+            defaults={
+                "designation": designation,
+                "basicPay": basicPay,
+                "accountNumber": accountNumber,
+                "ifscCode": ifscCode,
+                "bankName": bankName,
+                "branchName": branchName,
+            },
+        )
+
+        return redirect("view_profile")
+
+    userDetails = UserDetails.objects.filter(user=request.user).first()
+    profile = {
+        "firstName": request.user.first_name,
+        "lastName": request.user.last_name,
+    }
+    if userDetails:
+        profile.update(
+            {
+                "designation": userDetails.designation,
+                "basicPay": userDetails.basicPay,
+                "accountNumber": userDetails.accountNumber,
+                "ifscCode": userDetails.ifscCode,
+                "bankName": userDetails.bankName,
+                "branchName": userDetails.branchName,
+            }
+        )
+
+    return render(request, "user_profile.html", {"profile": profile})
 
 
 @login_required
@@ -388,87 +437,18 @@ def view_journeys(request):
 
 
 @login_required
-def generate_report(request):
-    report_data = [
+def generate_report(request, journeyRouteId):
+    profile = UserDetails.objects.filter(user=request.user).first()
+    if not profile:
+        return redirect("view_profile")
+    journeyRoute = JourneyRoute.objects.get(id=journeyRouteId)
+    journeyRoutePaths = JourneyRoutePath.objects.filter(route=journeyRoute)
+    return render(
+        request,
+        "generate_report.html",
         {
-            "departure_station": "Tvm",
-            "departure_date": "10/05/2024",
-            "departure_time": "10:00 AM",
-            "arrival_station": "Kochi",
-            "arrival_date": "11/05/2024",
-            "arrival_time": "11:30 AM",
-            "distance": "125",
-            "mode": "Train",
-            "fare": "250/-",
-            "incidential_expense": "565/-",
-            "da": "200/-",
-            "total": "1500/-",
-            "purpose": "Exam Duty",
-            "remarks": "Some remarks",
+            "profile": profile,
+            "journeyRoute": journeyRoute,
+            "journeyRoutePaths": journeyRoutePaths,
         },
-        {
-            "departure_station": "Kochi",
-            "departure_date": "15/05/2024",
-            "departure_time": "9:15 AM",
-            "arrival_station": "Thrissur",
-            "arrival_date": "15/05/2024",
-            "arrival_time": "10:45 AM",
-            "distance": "85",
-            "mode": "Bus",
-            "fare": "150/-",
-            "incidential_expense": "200/-",
-            "da": "100/-",
-            "total": "750/-",
-            "purpose": "Official Meeting",
-            "remarks": "Urgent work",
-        },
-        {
-            "departure_station": "Thrissur",
-            "departure_date": "20/05/2024",
-            "departure_time": "2:30 PM",
-            "arrival_station": "Calicut",
-            "arrival_date": "20/05/2024",
-            "arrival_time": "5:00 PM",
-            "distance": "120",
-            "mode": "Taxi",
-            "fare": "1200/-",
-            "incidential_expense": "300/-",
-            "da": "250/-",
-            "total": "2250/-",
-            "purpose": "Seminar",
-            "remarks": "Approved by Manager",
-        },
-        {
-            "departure_station": "Calicut",
-            "departure_date": "25/05/2024",
-            "departure_time": "6:45 AM",
-            "arrival_station": "Kannur",
-            "arrival_date": "25/05/2024",
-            "arrival_time": "8:30 AM",
-            "distance": "90",
-            "mode": "Train",
-            "fare": "180/-",
-            "incidential_expense": "120/-",
-            "da": "150/-",
-            "total": "950/-",
-            "purpose": "Inspection",
-            "remarks": "Pending reimb/-ement",
-        },
-        {
-            "departure_station": "Kannur",
-            "departure_date": "30/05/2024",
-            "departure_time": "11:00 AM",
-            "arrival_station": "Kasargod",
-            "arrival_date": "30/05/2024",
-            "arrival_time": "12:30 PM",
-            "distance": "75",
-            "mode": "Bus",
-            "fare": "90/-",
-            "incidential_expense": "50/-",
-            "da": "100/-",
-            "total": "500/-",
-            "purpose": "Training Session",
-            "remarks": "Completed successfully",
-        },
-    ]
-    return render(request, "generate_report.html", {"report_data": report_data})
+    )

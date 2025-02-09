@@ -26,6 +26,9 @@
                 </span>
             </div>
             {% endfor %}
+            <div>
+                <a href="{% url 'generate_report' journeyRouteWithPaths.journeyRoute.id %}">Generate Report</a>
+            </div>
         </div>
         {% endfor %}
     </div>

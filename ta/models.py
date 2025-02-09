@@ -16,7 +16,7 @@ class ModesOfTravel(models.IntegerChoices):
 
 
 class UserDetails(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=False)
     designation = models.CharField(max_length=255, null=False)
     address = models.TextField(null=False)
     basicPay = models.DecimalField(max_digits=12, decimal_places=2, null=False)

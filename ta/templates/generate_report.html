@@ -183,19 +183,19 @@
 	<table border="1" width="100%" class="table-1">
 		<tr>
 			<td>Head Quarters:</td>
-			<td>Name in Capital letters:</td>
-			<td>Basic Pay:</td>
+			<td>Name in Capital letters: {{ user.first_name|upper }} {{ user.last_name|upper }}</td>
+			<td>Basic Pay: {{ profile.basicPay }} </td>
 			<td>Allowance:</td>
 		</tr>
 		<tr>
 			<td></td>
-			<td>Designation:</td>
-			<td colspan="2">A/C No. & IFSC Code:</td>
+			<td>Designation: {{ profile.designation }}</td>
+			<td colspan="2">A/C No. & IFSC Code: {{ profile.accountNumber }} & {{ profile.ifscCode }}</td>
 		</tr>
 		<tr>
 			<td></td>
 			<td>Address:</td>
-			<td colspan="2">Bank/Branch:</td>
+			<td colspan="2">Bank & Branch: {{ profile.bankName }} & {{ profile.branchName }}</td>
 		</tr>
 	</table>
 	<table border="1" width="100%" class="table-2">
@@ -220,23 +220,23 @@
 			<td class="vertical-text">Purpose of<br> Journey</td>
 			<td class="vertical-text">Remarks</td>
 		</tr>
-		{% if report_data %}
-		{% for item in report_data %}
+		{% if journeyRoutePaths %}
+		{% for journeyRoutePath in journeyRoutePaths %}
 		<tr>
-			<td>{{ item.departure_station }}</td>
-			<td>{{ item.departure_date }}</td>
-			<td>{{ item.departure_time }}</td>
-			<td>{{ item.arrival_station }}</td>
-			<td>{{ item.arrival_date }}</td>
-			<td>{{ item.arrival_time }}</td>
-			<td>{{ item.distance }}</td>
-			<td>{{ item.mode }}</td>
-			<td>{{ item.fare }}</td>
-			<td>{{ item.incidential_expense }}</td>
-			<td>{{ item.da }}</td>
-			<td>{{ item.total }}</td>
-			<td class="vertical-text">{{ item.purpose }}</td>
-			<td class="vertical-text">{{ item.remarks }}</td>
+			<td>{{ journeyRoutePath.routeLink.start }}</td>
+			<td>{{ journeyRoutePath.startDate }}</td>
+			<td>{{ journeyRoutePath.startTime }}</td>
+			<td>{{ journeyRoutePath.routeLink.end }}</td>
+			<td>{{ journeyRoutePath.endDate }}</td>
+			<td>{{ journeyRoutePath.endTime }}</td>
+			<td>{{ journeyRoutePath.routeLink.distance }}</td>
+			<td>{{ journeyRoutePath.routeLink.mode }}</td>
+			<td>{{ journeyRoutePath.routeLink.price }} Rs</td>
+			<td>{{ 0 }}</td>
+			<td> To Calculate </td>
+			<td> To Calculate </td>
+			<td class="vertical-text">{{ journeyRoute.purpose }}</td>
+			<td class="vertical-text"></td>
 		</tr>
 		{% endfor %}
 		{% else %}

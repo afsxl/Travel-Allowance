@@ -1,0 +1,188 @@
+{% extends 'home.html' %}
+
+{% block title %}Add Route{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Profile</h1>
+    <p>{{ success }}</p>
+    <p>{{ error }}</p>
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="row">
+            <div class="col">
+                <label for="first_name">First Name</label>
+                <input type="text" name="first_name" id="first_name" placeholder="First Name"
+                    value="{{ profile.firstName }}" required>
+            </div>
+
+            <div class="col">
+                <label for="last_name">Last Name</label>
+                <input type="text" name="last_name" id="last_name" placeholder="Last Name"
+                    value="{{ profile.lastName }}" required>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label for="designation">Designation</label>
+                <input type="text" name="designation" id="designation" placeholder="Designation"
+                    value="{{ profile.designation }}" required>
+            </div>
+
+            <div class="col">
+                <label for="basic_pay">Basic Pay</label>
+                <input type="number" name="basic_pay" id="basic_pay" placeholder="Basic Pay"
+                    value="{{ profile.basicPay }}" required>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label for="account_number">Account Number</label>
+                <input type="text" name="account_number" id="account_number" placeholder="Account Number"
+                    value="{{ profile.accountNumber }}" required>
+            </div>
+
+            <div class="col">
+                <label for="ifsc_code">IFSC Code</label>
+                <input type="text" name="ifsc_code" id="ifsc_code" placeholder="IFSC Code"
+                    value="{{ profile.ifscCode }}" required>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label for="bank_name">Bank Name</label>
+                <input type="text" name="bank_name" id="bank_name" placeholder="Bank Name"
+                    value="{{ profile.bankName }}" required>
+            </div>
+
+            <div class="col">
+                <label for="branch_name">Branch Name</label>
+                <input type="text" name="branch_name" id="branch_name" placeholder="Branch Name"
+                    value="{{ profile.branchName }}" required>
+            </div>
+        </div>
+
+        <div class="form-group text-center button">
+            <button type="submit">Update Profile</button>
+        </div>
+    </form>
+</div>
+
+<style>
+    .container {
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        min-width: 800px;
+        width: 60%;
+        max-width: 1600px;
+        margin: 20px auto;
+        font-family: 'Arial', sans-serif;
+        color: #333;
+    }
+
+    h3 {
+        text-align: center;
+        color: #007bff;
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+    }
+
+    .row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+    }
+
+    .col {
+        flex: 1;
+        margin-right: 5px;
+    }
+
+    .col:last-child {
+        margin-right: 0;
+    }
+
+    label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    select,
+    input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 1rem;
+        box-sizing: border-box;
+        transition: border-color 0.3s ease;
+    }
+
+    select:focus,
+    input[type="number"
+
+    ]:focus {
+        border-color: #007bff;
+        outline: none;
+    }
+
+    .button {
+        padding: 10px;
+    }
+
+    button {
+        padding: 12px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+        background-color: #0056b3;
+    }
+
+    .route-list {
+        margin-top: 20px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        padding: 10px;
+        background-color:
+            #f8f9fa;
+    }
+
+    .route-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    .route-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .delete-btn {
+        background-color: #dc3545;
+        color:
+            white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .delete-btn:hover {
+        background-color: #c82333;
+    }
+</style>
+
+{% endblock %}

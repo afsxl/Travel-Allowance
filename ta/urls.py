@@ -29,7 +29,12 @@ urlpatterns = [
         views.add_route_to_journey,
         name="add_route_to_journey",
     ),
-    path("generate_report/", views.generate_report, name="generate_report"),
+    path(
+        "generate-report/<int:journeyRouteId>",
+        views.generate_report,
+        name="generate_report",
+    ),
+    path("view-profile/", views.view_profile, name="view_profile"),
 ]
 
 # Set the login URL to match your custom login page
