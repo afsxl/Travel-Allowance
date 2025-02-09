@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import *
+from datetime import datetime, date, time
 
 
 def login_view(request):
@@ -52,10 +53,10 @@ def home_view(request):
 
 @login_required
 def view_routes(request):
-    routes = Route.objects.all()
+    routes = Route.objects.filter(Q(verified=True) | Q(createdBy=request.user))
     routesWithPaths = []
     for route in routes:
-        routePaths = RoutePath.objects.filter(route=route)
+        routePaths = RoutePath.objects.filter(route=route).order_by("order")
         routesWithPaths.append({"route": route, "routePaths": routePaths})
     return render(request, "view_routes.html", {"routesWithPaths": routesWithPaths})
 
@@ -294,7 +295,96 @@ def save_all_route_path(request, routeId):
 @login_required
 def add_route_to_journey(request, routeId):
     route = Route.objects.get(id=routeId)
-    return render(request, "add_journey.html")
+    routePaths = RoutePath.objects.filter(route=route)
+    error = ""
+    journeyTime = {}
+
+    if request.method == "POST":
+        purpose = request.POST.get("purpose")
+        previousRoute = None
+        for routePath in routePaths:
+            startDate = request.POST.get(f"startDate{routePath.id}")
+            startTime = request.POST.get(f"startTime{routePath.id}")
+            endDate = request.POST.get(f"endDate{routePath.id}")
+            endTime = request.POST.get(f"endTime{routePath.id}")
+
+            if startDate and startTime and endDate and endTime:
+                start_datetime = datetime.strptime(
+                    f"{startDate} {startTime}", "%Y-%m-%d %H:%M"
+                )
+                end_datetime = datetime.strptime(
+                    f"{endDate} {endTime}", "%Y-%m-%d %H:%M"
+                )
+
+                if (
+                    previousRoute
+                    and journeyTime.get(f"end_datetime{previousRoute.id}")
+                    > start_datetime
+                ) or (start_datetime > end_datetime):
+                    print("Error")
+                    error = f"Invalid Date selected for {routePath.routeLink.start.name} To {routePath.routeLink.end.name}"
+                else:
+                    journeyTime[f"start_datetime{routePath.id}"] = start_datetime
+                    journeyTime[f"end_datetime{routePath.id}"] = end_datetime
+
+            previousRoute = routePath
+
+        if not error:
+            journeyRoute = JourneyRoute.objects.create(
+                purpose=purpose,
+                source=route.source.name,
+                destination=route.destination.name,
+                user=request.user,
+            )
+            for routePath in routePaths:
+                journeyRouteLink = JourneyRouteLink.objects.create(
+                    start=routePath.routeLink.start.name,
+                    end=routePath.routeLink.end.name,
+                    mode=ModesOfTravel(routePath.routeLink.mode).label,
+                    distance=routePath.routeLink.distance,
+                    price=routePath.routeLink.price,
+                    user=request.user,
+                )
+                JourneyRoutePath.objects.create(
+                    route=journeyRoute,
+                    routeLink=journeyRouteLink,
+                    order=routePath.order,
+                    startDate=journeyTime.get(f"start_datetime{routePath.id}").date(),
+                    startTime=journeyTime.get(f"start_datetime{routePath.id}").time(),
+                    endDate=journeyTime.get(f"end_datetime{routePath.id}").date(),
+                    endTime=journeyTime.get(f"end_datetime{routePath.id}").time(),
+                    user=request.user,
+                )
+
+            return redirect("view_journeys")
+
+    return render(
+        request,
+        "add_journey.html",
+        {
+            "route": route,
+            "routePaths": routePaths,
+            "error": error,
+        },
+    )
+
+
+@login_required
+def view_journeys(request):
+    journeyRoutes = JourneyRoute.objects.filter(user=request.user)
+    journeyRoutesWithPaths = []
+    for journeyRoute in journeyRoutes:
+        journeyRoutePaths = JourneyRoutePath.objects.filter(
+            route=journeyRoute
+        ).order_by("order")
+        journeyRoutesWithPaths.append(
+            {"journeyRoute": journeyRoute, "journeyRoutePaths": journeyRoutePaths}
+        )
+    return render(
+        request,
+        "view_journeys.html",
+        {"journeyRoutesWithPaths": journeyRoutesWithPaths},
+    )
 
 
 @login_required

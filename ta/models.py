@@ -73,36 +73,29 @@ class TemporaryRoutePath(models.Model):
 
 
 class JourneyRoute(models.Model):
-    source = models.ForeignKey(
-        RouteStop,
-        on_delete=models.CASCADE,
-        null=False,
-        related_name="journeyRouteSource",
-    )
-    destination = models.ForeignKey(
-        RouteStop,
-        on_delete=models.CASCADE,
-        null=False,
-        related_name="journeyRouteDestination",
-    )
+    source = models.CharField(max_length=255, null=False)
+    destination = models.CharField(max_length=255, null=False)
+    purpose = models.CharField(max_length=255, null=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
 
 
 class JourneyRouteLink(models.Model):
-    start = models.ForeignKey(
-        RouteStop, on_delete=models.CASCADE, related_name="journeyRouteLinkStart"
-    )
-    end = models.ForeignKey(
-        RouteStop, on_delete=models.CASCADE, related_name="journeyRouteLinkEnd"
-    )
+    start = models.CharField(max_length=255, null=False)
+    end = models.CharField(max_length=255, null=False)
     distance = models.DecimalField(max_digits=6, decimal_places=2, null=False)
-    mode = models.IntegerField(choices=ModesOfTravel.choices, null=False)
+    mode = models.CharField(max_length=255, null=False)
     price = models.DecimalField(max_digits=10, decimal_places=2, null=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
 
 
 class JourneyRoutePath(models.Model):
-    route = models.ForeignKey(Route, on_delete=models.CASCADE, null=False)
-    routeLink = models.ForeignKey(RouteLink, on_delete=models.CASCADE, null=False)
+    route = models.ForeignKey(JourneyRoute, on_delete=models.CASCADE, null=False)
+    routeLink = models.ForeignKey(
+        JourneyRouteLink, on_delete=models.CASCADE, null=False
+    )
     order = models.IntegerField(null=False)
+    startDate = models.DateField(null=False)
+    startTime = models.TimeField(null=False)
+    endDate = models.DateField(null=False)
+    endTime = models.TimeField(null=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=False)

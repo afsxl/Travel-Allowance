@@ -1,56 +1,181 @@
 {% extends 'home.html' %}
 
-{% block title %}Add Journey{% endblock %}
+{% block title %}Add Route{% endblock %}
 
 {% block content %}
 <div class="container">
-    <h1>Add Journey</h1>
-    <div class="list-group">
-    </div>
+    <h1>Add New Journey</h1>
+    <h3>{{ route.source.name }} To {{ route.destination.name }}</h3>
+    <p>{{ success }}</p>
+    <p>{{ error }}</p>
+    <form method="POST" action="{% url 'add_route_to_journey' route.id %}">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col">
+                <label for="purpose">Purpose of Journey:</label>
+                <input type="text" id="purpose" name="purpose" placeholder="Purpose of Journey" required>
+            </div>
+        </div>
+        <div id="route-list" class="route-list">
+            {% for routePath in routePaths %}
+            <div class="route-item">
+                <span>
+                    Start : {{ routePath.routeLink.start.name }},
+                    End : {{ routePath.routeLink.end.name }},
+                    Mode Of Travel : {{ routePath.routeLink.get_mode_display }},
+                    Distance : {{ routePath.routeLink.distance }},
+                    Price : {{ routePath.routeLink.price }}
+                </span>
+                <label for="startDate{{ routePath.id }}">Start Date</label>
+                <input type="date" name="startDate{{ routePath.id }}" id="startDate{{ routePath.id }}" required>
+
+                <label for="startTime{{ routePath.id }}">Start Time</label>
+                <input type="time" name="startTime{{ routePath.id }}" id="startTime{{ routePath.id }}" required>
+
+                <label for="endDate{{ routePath.id }}">End Date</label>
+                <input type="date" name="endDate{{ routePath.id }}" id="endDate{{ routePath.id }}" required>
+
+                <label for="endTime{{ routePath.id }}">End Time</label>
+                <input type="time" name="endTime{{ routePath.id }}" id="endTime{{ routePath.id }}" required>
+            </div>
+            {% endfor %}
+            <div class="btn-class">
+                <button type="submit">Add New Journey</button>
+            </div>
+        </div>
+    </form>
 </div>
 
 <style>
     .container {
-        background-color: white;
-        padding: 20px;
-        border-radius: 10px;
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        max-width: 1000px;
-        margin: 0 auto;
+        min-width: 800px;
+        width: 60%;
+        max-width: 1600px;
+        margin: 20px auto;
+        font-family: 'Arial', sans-serif;
+        color: #333;
     }
 
-    h1 {
+    h3 {
         text-align: center;
-        color: #333;
+        font-size: 1.8rem;
         margin-bottom: 20px;
     }
 
-    .list-group-item {
+    .row {
+        display: flex;
+        justify-content: space-between;
         margin-bottom: 15px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        padding: 20px;
-        background-color: #f9f9f9;
     }
 
-    .btn {
-        padding: 10px 20px;
-        margin-top: 10px;
+    .route-list {
+        margin-top: 20px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        padding: 10px;
+        background-color:
+            #f8f9fa;
+    }
+
+    .route-item {
+        display: flex;
+        flex-direction: column;
+        margin-top: 20px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        padding: 10px;
+        background-color:
+            #f8f9fa;
+    }
+
+    .route-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .col {
+        flex: 1;
+        margin-right: 5px;
+    }
+
+    .col:last-child {
+        margin-right: 0;
+    }
+
+    label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    input,
+    select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 1rem;
+        box-sizing: border-box;
+        transition: border-color 0.3s ease;
+    }
+
+    select:focus,
+    input[type="number"
+
+    ]:focus {
+        border-color: #007bff;
+        outline: none;
+    }
+
+    button {
+        padding: 12px;
+        background-color: #007bff;
         color: white;
-        text-decoration: none;
+        border: none;
         border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
     }
 
-    .btn-info {
-        background-color: #17a2b8;
+    button:hover {
+        background-color: #0056b3;
     }
 
-    .btn-warning {
-        background-color: #ffc107;
+    .route-list {
+        margin-top: 20px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        padding: 10px;
+        background-color:
+            #f8f9fa;
     }
 
-    .btn:hover {
-        opacity: 0.8;
+    .route-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    .route-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .delete-btn {
+        background-color: #dc3545;
+        color:
+            white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .delete-btn:hover {
+        background-color: #c82333;
     }
 </style>
+
 {% endblock %}

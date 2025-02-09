@@ -21,6 +21,7 @@ urlpatterns = [
         name="save_all_route_path",
     ),
     path("view-routes/", views.view_routes, name="view_routes"),
+    path("view-journeys/", views.view_journeys, name="view_journeys"),
     path("add-route-stop/", views.add_route_stop, name="add_route_stop"),
     path("add-route-link/", views.add_route_link, name="add_route_link"),
     path(
