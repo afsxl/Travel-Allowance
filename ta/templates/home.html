@@ -88,6 +88,7 @@
 
 		tbody tr:hover {
 			background-color: #f1f1f1;
+			color: black;
 		}
 
 		.empty-row td {
@@ -110,10 +111,16 @@
 
 		a:hover {
 			background-color: #0056b3;
+			color: white;
 		}
 
 		.icon {
 			font-size: 1.2rem;
+		}
+		.avatar{
+			border-radius: 50%;
+			aspect-ratio: 1/1;
+			color: black;
 		}
 	</style>
 </head>
@@ -133,16 +140,18 @@
 				<li class="nav-item">
 					<span class="nav-link">Welcome, {{ user.username }}!</span>
 				</li>
-				<li>
-					<a href="{% url 'view_profile' %}">Profile</a>
-				</li>
+				
 				<li class="nav-item">
 					<a class="nav-link" href="{% url 'logout' %}">Logout</a>
+				</li>
+				<li>
+					<a href="{% url 'view_profile' %}" class="avatar"><i class="fa-solid fa-user"></i></a>
 				</li>
 				{% else %}
 				<li class="nav-item">
 					<a class="nav-link" href="{% url 'login' %}">Login</a>
 				</li>
+
 				{% endif %}
 			</ul>
 		</nav>
@@ -201,9 +210,13 @@
 		<!-- Content Wrapper -->
 		<div class="content-wrapper">
 			<div class="content-header">
-				<div class="container-fluid">
-					<h1 class="m-0">Welcome to Travel Allowance System</h1>
+				{% if request.path == '/ta/home/' %}
+				<div class="content-header">
+					<div class="container-fluid">
+						<h1 class="m-0">Welcome to Travel Allowance System</h1>
+					</div>
 				</div>
+				{% endif %}
 			</div>
 
 			<div class="content">

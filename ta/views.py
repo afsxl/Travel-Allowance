@@ -52,6 +52,7 @@ def home_view(request):
 
 
 def view_profile(request):
+    success = ""
     if request.method == "POST":
         firstName = request.POST.get("first_name")
         lastName = request.POST.get("last_name")
@@ -77,13 +78,13 @@ def view_profile(request):
                 "branchName": branchName,
             },
         )
-
-        return redirect("view_profile")
-
+        success = "Profile updated successfully"
+   
     userDetails = UserDetails.objects.filter(user=request.user).first()
     profile = {
-        "firstName": request.user.first_name,
-        "lastName": request.user.last_name,
+
+        "firstName":  User.objects.get(id = request.user.id).first_name,
+        "lastName": User.objects.get(id = request.user.id).last_name,
     }
     if userDetails:
         profile.update(
@@ -97,7 +98,7 @@ def view_profile(request):
             }
         )
 
-    return render(request, "user_profile.html", {"profile": profile})
+    return render(request, "user_profile.html", {"profile": profile,"success":success})
 
 
 @login_required
@@ -450,5 +451,6 @@ def generate_report(request, journeyRouteId):
             "profile": profile,
             "journeyRoute": journeyRoute,
             "journeyRoutePaths": journeyRoutePaths,
+            "total_count":len(journeyRoutePaths) 
         },
     )

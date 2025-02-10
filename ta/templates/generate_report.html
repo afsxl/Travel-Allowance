@@ -13,6 +13,9 @@
 	h2 {
 		font-size: 16px;
 		text-align: center;
+		margin: 0 !important;
+		display: flex;
+		place-items: center;
 	}
 
 	.table-1 tr>td {
@@ -22,11 +25,11 @@
 	.table-1 tr,
 	.table-1 tr td {
 		border: none;
+		height: 10px !important;
 	}
 
 	.table-1 {
 		border-bottom: none !important;
-
 	}
 
 	.table-1,
@@ -54,8 +57,8 @@
 		word-wrap: break-word;
 		text-align: center;
 		height: 65px;
-		padding: none;
-		margin: none;
+		padding: 0;
+		margin: 0;
 	}
 
 	.vertical-text {
@@ -67,9 +70,9 @@
 	}
 
 	.consent {
-		line-height: 2rem;
+		line-height: 1.2rem;
 		font-size: 14px;
-		margin-top: 1rem;
+		margin-top: 0.5rem;
 	}
 
 	.consent>div {
@@ -85,7 +88,7 @@
 		height: 60px;
 		width: 30%;
 		justify-content: center;
-		gap: 1rem;
+		gap: 0.5rem;
 	}
 
 	.signature-field {
@@ -96,8 +99,7 @@
 	}
 
 	.consent>div>span>p {
-		margin-top: 15px !important;
-
+		margin-top: 5px !important;
 	}
 
 	.consent>span>span {
@@ -105,9 +107,8 @@
 		justify-content: space-between;
 		place-items: center;
 		width: 50%;
-		gap: 1rem;
-		margin-bottom: 1rem;
-
+		gap: 0.5rem;
+		margin-bottom: 0.5rem;
 	}
 
 	.consent>span {
@@ -115,26 +116,82 @@
 		place-items: center;
 		justify-content: space-between;
 		width: 52%;
+		gap: 0.5rem;
+		margin-bottom: 0.5rem;
+	}
+
+	.table-1 td,
+	.table-1 tr {
+		padding: 5px !important;
+	}
+
+	.table-2 tr:nth-child(1) td {
+		height: 30px !important;
+	}
+
+	.table-2 tr:not(:nth-child(2)) td {
+		height: 30px !important;
+	}
+
+	.report-container-header {
+		display: flex;
 		gap: 1rem;
-		margin-bottom: 1rem;
+		justify-content: center;
+	}
+
+	.action-btn {
+		background-color: rgb(82, 82, 223);
+		color: white;
+		border-radius: 8px;
+		padding-inline: 1rem;
+		outline: none;
+		border: 0;
+		font-size: 12px;
+		margin-bottom: 0.5rem;
+	}
+
+	.action-btn:hover {
+		filter: brightness(1.5);
 	}
 
 	@media print {
+		.action-btn {
+			display: none;
+		}
+
 		@page {
 			size: landscape;
+			margin: 0;
+		}
+
+		body {
+			visibility: visible !important;
 		}
 
 		body * {
-			visibility: hidden;
+			visibility: hidden !important;
 		}
 
 		#pdfToPrint,
 		#pdfToPrint * {
-			visibility: visible;
+			visibility: visible !important;
+		}
+
+		@page {
+			margin: 1rem;
+		}
+
+		header,
+		footer,
+		nav,
+		.other-elements {
+			display: none !important;
 		}
 
 		#pdfToPrint {
 			width: 100%;
+			padding: 0;
+			margin: 0;
 		}
 
 		.table-1,
@@ -173,13 +230,26 @@
 			text-align: center;
 		}
 
+		.table-2 tr:nth-child(1) td {
+			height: 30px !important;
+		}
+
+		.table-2 tr:not(:nth-child(2)) td {
+			height: 30px !important;
+		}
 	}
 </style>
 
 
 
 <section class="report-container" id="pdfToPrint">
-	<h2 class="header">STATE INSTITUTE OF TECHNICAL TEACHERS TRAINING & RESEARCH, KALAMASSERY</h2>
+	<div class="report-container-header">
+		<h2 class="header" id="instituteHeader">STATE INSTITUTE OF TECHNICAL TEACHERS TRAINING & RESEARCH, KALAMASSERY
+		</h2>
+		<span>
+			<button type="button" class="action-btn" id="editButton" onclick="toggleEdit()">Edit</button>
+		</span>
+	</div>
 	<table border="1" width="100%" class="table-1">
 		<tr>
 			<td>Head Quarters:</td>
@@ -205,12 +275,12 @@
 			<td colspan="8"></td>
 		</tr>
 		<tr>
-			<td>Station</td>
-			<td>Date</td>
-			<td>Time</td>
-			<td>Station</td>
-			<td>Date</td>
-			<td>Time</td>
+			<td class="horizontal-text">Station</td>
+			<td class="horizontal-text">Date</td>
+			<td class="horizontal-text">Time</td>
+			<td class="horizontal-text">Station</td>
+			<td class="horizontal-text">Date</td>
+			<td class="horizontal-text">Time</td>
 			<td class="vertical-text">Distance<br>(km)</td>
 			<td class="vertical-text">Mode of<br> journey <br>Rail/Road</td>
 			<td class="vertical-text">Fare(Rs)</td>
@@ -235,8 +305,12 @@
 			<td>{{ 0 }}</td>
 			<td> To Calculate </td>
 			<td> To Calculate </td>
-			<td class="vertical-text">{{ journeyRoute.purpose }}</td>
-			<td class="vertical-text"></td>
+			{% if forloop.first %}
+			<td class="vertical-text" rowspan="{{ total_count }}">{{ journeyRoute.purpose }}</td>
+			{% endif %}
+			<td class="remarks"></td>
+			
+
 		</tr>
 		{% endfor %}
 		{% else %}
@@ -258,8 +332,6 @@
 			<td></td>
 			<td></td>
 			<td></td>
-			<td></td>
-
 		</tr>
 	</table>
 	<div class="consent">
@@ -301,11 +373,40 @@
 <button id="printReportBtn">Print Report</button>
 
 <script>
+	var isEdit = false;
 	document
 		.getElementById("printReportBtn")
 		.addEventListener("click", function () {
 			window.print();
 		});
+
+	function toggleEdit() {
+		isEdit = !isEdit;
+		var button = document.getElementById("editButton");
+		var header = document.getElementById("instituteHeader");
+		var remarks = document.querySelectorAll('.remarks');
+
+		if (isEdit) {
+			header.setAttribute("contenteditable", "true");
+			header.style.border = "1px dashed red";
+			button.textContent = "Save";
+			button.style.backgroundColor = isEdit ? "green" : "rgb(82, 82, 223)"
+
+			remarks.forEach(function (remark) {
+				remark.setAttribute("contenteditable", "true");
+				remark.style.border = "1px dashed red";
+			});
+		} else {
+			header.removeAttribute("contenteditable");
+			header.style.border = "none";
+			button.textContent = "Edit";
+
+			remarks.forEach(function (remark) {
+				remark.removeAttribute("contenteditable");
+				remark.style.border = "1px solid #000";
+			});
+		}
+	}
 </script>
 
 {% endblock %}

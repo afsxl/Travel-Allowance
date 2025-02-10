@@ -6,8 +6,15 @@
 <div class="container">
     <h1>Add New Journey</h1>
     <h3>{{ route.source.name }} To {{ route.destination.name }}</h3>
-    <p>{{ success }}</p>
-    <p>{{ error }}</p>
+    <span class="response-msg">
+        {% if success %}
+        <p class="success-message">{{ success }}</p>
+        {% endif %}
+        {% if error %}
+      
+        <p class="error-message">{{ error }}</p>
+          {% endif %}
+         </span>
     <form method="POST" action="{% url 'add_route_to_journey' route.id %}">
         {% csrf_token %}
         <div class="row">
@@ -175,6 +182,16 @@
 
     .delete-btn:hover {
         background-color: #c82333;
+    }
+    .success-message{
+        border: 2px solid green;
+        padding-inline:1rem !important;
+        border-radius: 8px;
+    }
+    .error-message{
+        border: 2px solid rgb(255, 0, 0);
+        padding-inline:1rem !important;
+        border-radius: 8px;
     }
 </style>
 
