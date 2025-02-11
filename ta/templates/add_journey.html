@@ -5,16 +5,14 @@
 {% block content %}
 <div class="container">
     <h1>Add New Journey</h1>
-    <h3>{{ route.source.name }} To {{ route.destination.name }}</h3>
     <span class="response-msg">
         {% if success %}
         <p class="success-message">{{ success }}</p>
         {% endif %}
         {% if error %}
-      
         <p class="error-message">{{ error }}</p>
-          {% endif %}
-         </span>
+        {% endif %}
+    </span>
     <form method="POST" action="{% url 'add_route_to_journey' route.id %}">
         {% csrf_token %}
         <div class="row">
@@ -22,7 +20,19 @@
                 <label for="purpose">Purpose of Journey:</label>
                 <input type="text" id="purpose" name="purpose" placeholder="Purpose of Journey" required>
             </div>
+
+            <div class="col">
+                <label for="da_halt">Da Halt:</label>
+                <select id="da_halt" name="da_halt" required>
+                    <option value="" selected disabled>-- Select Da Halt --</option>
+                    {% for value, label in daHaltChoices %}
+                    <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
+        <br>
+        <h4>{{ route.source.name }} To {{ route.destination.name }}</h4>
         <div id="route-list" class="route-list">
             {% for routePath in routePaths %}
             <div class="route-item">
@@ -46,9 +56,33 @@
                 <input type="time" name="endTime{{ routePath.id }}" id="endTime{{ routePath.id }}" required>
             </div>
             {% endfor %}
-            <div class="btn-class">
-                <button type="submit">Add New Journey</button>
-            </div>
+        </div>
+        <br><br>
+        <h4>{{ route.destination.name }} To {{ route.source.name }}</h4>
+        {% for routePath in reverseRoutePaths %}
+        <div class="route-item">
+            <span>
+                Start : {{ routePath.routeLink.end.name }},
+                End : {{ routePath.routeLink.start.name }},
+                Mode Of Travel : {{ routePath.routeLink.get_mode_display }},
+                Distance : {{ routePath.routeLink.distance }},
+                Price : {{ routePath.routeLink.price }}
+            </span>
+            <label for="revStartDate{{ routePath.id }}">Start Date</label>
+            <input type="date" name="revStartDate{{ routePath.id }}" id="revStartDate{{ routePath.id }}" required>
+
+            <label for="revStartTime{{ routePath.id }}">Start Time</label>
+            <input type="time" name="revStartTime{{ routePath.id }}" id="revStartTime{{ routePath.id }}" required>
+
+            <label for="revEndDate{{ routePath.id }}">End Date</label>
+            <input type="date" name="revEndDate{{ routePath.id }}" id="revEndDate{{ routePath.id }}" required>
+
+            <label for="revEndTime{{ routePath.id }}">End Time</label>
+            <input type="time" name="revEndTime{{ routePath.id }}" id="revEndTime{{ routePath.id }}" required>
+        </div>
+        {% endfor %}
+        <div class="btn-class">
+            <button type="submit">Add New Journey</button>
         </div>
     </form>
 </div>
@@ -183,14 +217,16 @@
     .delete-btn:hover {
         background-color: #c82333;
     }
-    .success-message{
+
+    .success-message {
         border: 2px solid green;
-        padding-inline:1rem !important;
+        padding-inline: 1rem !important;
         border-radius: 8px;
     }
-    .error-message{
+
+    .error-message {
         border: 2px solid rgb(255, 0, 0);
-        padding-inline:1rem !important;
+        padding-inline: 1rem !important;
         border-radius: 8px;
     }
 </style>

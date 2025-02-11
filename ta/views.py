@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import *
 from datetime import datetime, date, time
+import inflect
 
 
 def login_view(request):
@@ -62,6 +63,9 @@ def view_profile(request):
         ifscCode = request.POST.get("ifsc_code")
         bankName = request.POST.get("bank_name")
         branchName = request.POST.get("branch_name")
+        collegeName = request.POST.get("college_name")
+        collegeDistrict = request.POST.get("college_district")
+        address = request.POST.get("address")
 
         User.objects.filter(id=request.user.id).update(
             first_name=firstName, last_name=lastName
@@ -76,15 +80,17 @@ def view_profile(request):
                 "ifscCode": ifscCode,
                 "bankName": bankName,
                 "branchName": branchName,
+                "collegeName": collegeName,
+                "collegeDistrict": collegeDistrict,
+                "address": address,
             },
         )
         success = "Profile updated successfully"
-   
+
     userDetails = UserDetails.objects.filter(user=request.user).first()
     profile = {
-
-        "firstName":  User.objects.get(id = request.user.id).first_name,
-        "lastName": User.objects.get(id = request.user.id).last_name,
+        "firstName": User.objects.get(id=request.user.id).first_name,
+        "lastName": User.objects.get(id=request.user.id).last_name,
     }
     if userDetails:
         profile.update(
@@ -95,10 +101,15 @@ def view_profile(request):
                 "ifscCode": userDetails.ifscCode,
                 "bankName": userDetails.bankName,
                 "branchName": userDetails.branchName,
+                "collegeName": userDetails.collegeName,
+                "collegeDistrict": userDetails.collegeDistrict,
+                "address": userDetails.address,
             }
         )
 
-    return render(request, "user_profile.html", {"profile": profile,"success":success})
+    return render(
+        request, "user_profile.html", {"profile": profile, "success": success}
+    )
 
 
 @login_required
@@ -273,16 +284,37 @@ def add_route_path(request, routeId):
     route = Route.objects.get(id=routeId)
     routeLinks = RouteLink.objects.filter(Q(verified=True) | Q(createdBy=request.user))
     routePaths = RoutePath.objects.filter(route=routeId).order_by("order")
+    error = ""
 
     if request.method == "POST":
         routeLinkId = request.POST.get("routeLinkId")
         routeLink = RouteLink.objects.get(id=routeLinkId)
-        TemporaryRoutePath.objects.create(
-            route=route,
-            routeLink=routeLink,
-            order=1 if routePaths.count() == 0 else routePaths.last().order + 1,
-            createdBy=request.user,
-        )
+        temporaryRoutePaths = TemporaryRoutePath.objects.filter(route=routeId)
+
+        if not routePaths.count() and not temporaryRoutePaths.count():
+            if route.source.id == routeLink.start.id:
+                TemporaryRoutePath.objects.create(
+                    route=route,
+                    routeLink=routeLink,
+                    order=1,
+                    createdBy=request.user,
+                )
+            else:
+                error = "First Stop Of Route Should Be Source Of Route"
+        elif temporaryRoutePaths.count():
+            TemporaryRoutePath.objects.create(
+                route=route,
+                routeLink=routeLink,
+                order=temporaryRoutePaths.last().order + 1,
+                createdBy=request.user,
+            )
+        else:
+            TemporaryRoutePath.objects.create(
+                route=route,
+                routeLink=routeLink,
+                order=routePaths.last().order + 1,
+                createdBy=request.user,
+            )
     else:
         TemporaryRoutePath.objects.filter(
             route=routeId, createdBy=request.user
@@ -300,7 +332,12 @@ def add_route_path(request, routeId):
     return render(
         request,
         "add_route_path.html",
-        {"route": route, "routeLinks": routeLinks, "routePaths": routePaths},
+        {
+            "route": route,
+            "routeLinks": routeLinks,
+            "routePaths": routePaths,
+            "error": error,
+        },
     )
 
 
@@ -309,26 +346,63 @@ def remove_route_path(request, routePathId, routeId):
     route = Route.objects.get(id=routeId)
     routeLinks = RouteLink.objects.filter(Q(verified=True) | Q(createdBy=request.user))
     routePaths = TemporaryRoutePath.objects.filter(route=routeId).order_by("order")
+    error = ""
 
-    if TemporaryRoutePath.objects.filter(id=routePathId).exists():
-        TemporaryRoutePath.objects.filter(id=routePathId).delete()
+    if routePaths.count() == 1:
+        if TemporaryRoutePath.objects.filter(id=routePathId).exists():
+            TemporaryRoutePath.objects.filter(id=routePathId).delete()
+    else:
+        if TemporaryRoutePath.objects.filter(id=routePathId).exists():
+            if (
+                TemporaryRoutePath.objects.get(id=routePathId).routeLink.start.id
+                == route.source.id
+            ):
+                error = "Cannot Delete First Link"
+            else:
+                TemporaryRoutePath.objects.filter(id=routePathId).delete()
 
     return render(
         request,
         "add_route_path.html",
-        {"route": route, "routeLinks": routeLinks, "routePaths": routePaths},
+        {
+            "route": route,
+            "routeLinks": routeLinks,
+            "routePaths": routePaths,
+            "error": error,
+        },
     )
 
 
 @login_required
 def save_all_route_path(request, routeId):
     route = Route.objects.get(id=routeId)
+    error = ""
 
     RoutePath.objects.filter(route=route, createdBy=request.user).delete()
 
     temporaryRoutePaths = TemporaryRoutePath.objects.filter(
         route=route, createdBy=request.user
     ).order_by("order")
+
+    if (
+        temporaryRoutePaths.count()
+        and route.destination.id != temporaryRoutePaths.last().routeLink.end.id
+    ):
+        routeLinks = RouteLink.objects.filter(
+            Q(verified=True) | Q(createdBy=request.user)
+        )
+        routePaths = TemporaryRoutePath.objects.filter(route=routeId).order_by("order")
+        error = "Last Stop Of Route Should Be Destination Of Route"
+        return render(
+            request,
+            "add_route_path.html",
+            {
+                "route": route,
+                "routeLinks": routeLinks,
+                "routePaths": routePaths,
+                "error": error,
+            },
+        )
 
     for index, temporaryRoutePath in enumerate(temporaryRoutePaths):
         RoutePath.objects.create(
@@ -346,11 +420,14 @@ def save_all_route_path(request, routeId):
 def add_route_to_journey(request, routeId):
     route = Route.objects.get(id=routeId)
     routePaths = RoutePath.objects.filter(route=route)
+    reverseRoutePaths = routePaths.reverse()
+    daHaltChoices = DaHaltTypes.choices
     error = ""
     journeyTime = {}
 
     if request.method == "POST":
         purpose = request.POST.get("purpose")
+        daHalt = request.POST.get("da_halt")
         previousRoute = None
         for routePath in routePaths:
             startDate = request.POST.get(f"startDate{routePath.id}")
@@ -371,8 +448,8 @@ def add_route_to_journey(request, routeId):
                     and journeyTime.get(f"end_datetime{previousRoute.id}")
                     > start_datetime
                 ) or (start_datetime > end_datetime):
-                    print("Error")
                     error = f"Invalid Date selected for {routePath.routeLink.start.name} To {routePath.routeLink.end.name}"
+                    break
                 else:
                     journeyTime[f"start_datetime{routePath.id}"] = start_datetime
                     journeyTime[f"end_datetime{routePath.id}"] = end_datetime
@@ -380,10 +457,43 @@ def add_route_to_journey(request, routeId):
             previousRoute = routePath
 
         if not error:
+            for routePath in reverseRoutePaths:
+                startDate = request.POST.get(f"revStartDate{routePath.id}")
+                startTime = request.POST.get(f"revStartTime{routePath.id}")
+                endDate = request.POST.get(f"revEndDate{routePath.id}")
+                endTime = request.POST.get(f"revEndTime{routePath.id}")
+
+                if startDate and startTime and endDate and endTime:
+                    start_datetime = datetime.strptime(
+                        f"{startDate} {startTime}", "%Y-%m-%d %H:%M"
+                    )
+                    end_datetime = datetime.strptime(
+                        f"{endDate} {endTime}", "%Y-%m-%d %H:%M"
+                    )
+
+                    previousEndDateTime = (
+                        journeyTime.get(f"end_datetime{previousRoute.id}")
+                        if routePath == reverseRoutePaths[0]
+                        else journeyTime.get(f"revEnd_datetime{previousRoute.id}")
+                    )
+
+                    if (previousEndDateTime > start_datetime) or (
+                        start_datetime > end_datetime
+                    ):
+                        error = f"Invalid Date selected for {routePath.routeLink.end.name} To {routePath.routeLink.start.name}"
+                        break
+                    else:
+                        journeyTime[f"revStart_datetime{routePath.id}"] = start_datetime
+                        journeyTime[f"revEnd_datetime{routePath.id}"] = end_datetime
+
+                previousRoute = routePath
+
+        if not error:
             journeyRoute = JourneyRoute.objects.create(
                 purpose=purpose,
                 source=route.source.name,
                 destination=route.destination.name,
+                daHaltCondition=daHalt,
                 user=request.user,
             )
             for routePath in routePaths:
@@ -406,6 +516,34 @@ def add_route_to_journey(request, routeId):
                     user=request.user,
                 )
 
+            for routePath in reverseRoutePaths:
+                journeyRouteLink = JourneyRouteLink.objects.create(
+                    start=routePath.routeLink.end.name,
+                    end=routePath.routeLink.start.name,
+                    mode=ModesOfTravel(routePath.routeLink.mode).label,
+                    distance=routePath.routeLink.distance,
+                    price=routePath.routeLink.price,
+                    user=request.user,
+                )
+                JourneyRoutePath.objects.create(
+                    route=journeyRoute,
+                    routeLink=journeyRouteLink,
+                    order=JourneyRoutePath.objects.filter(route=journeyRoute)
+                    .order_by("order")
+                    .last()
+                    .order
+                    + 1,
+                    startDate=journeyTime.get(
+                        f"revStart_datetime{routePath.id}"
+                    ).date(),
+                    startTime=journeyTime.get(
+                        f"revStart_datetime{routePath.id}"
+                    ).time(),
+                    endDate=journeyTime.get(f"revEnd_datetime{routePath.id}").date(),
+                    endTime=journeyTime.get(f"revEnd_datetime{routePath.id}").time(),
+                    user=request.user,
+                )
+
             return redirect("view_journeys")
 
     return render(
@@ -414,6 +552,8 @@ def add_route_to_journey(request, routeId):
         {
             "route": route,
             "routePaths": routePaths,
+            "reverseRoutePaths": reverseRoutePaths,
+            "daHaltChoices": daHaltChoices,
             "error": error,
         },
     )
@@ -444,13 +584,81 @@ def generate_report(request, journeyRouteId):
         return redirect("view_profile")
     journeyRoute = JourneyRoute.objects.get(id=journeyRouteId)
     journeyRoutePaths = JourneyRoutePath.objects.filter(route=journeyRoute)
+    longestRoutePath = journeyRoutePaths.first()
+    fromSource = journeyRoutePaths.first()
+    fromDestination = journeyRoutePaths.last()
+    journeyRoutePathsWithCalculations = []
+    totalAmount = 0.0
+    for journeyRoutePath in journeyRoutePaths:
+        if journeyRoutePath.routeLink.distance > longestRoutePath.routeLink.distance:
+            longestRoutePath = journeyRoutePath
+
+        incidentalExpense = 0.0
+        daForHalt = ""
+        numberOf12Hours = (
+            (
+                datetime.combine(journeyRoutePath.endDate, journeyRoutePath.endTime)
+                - datetime.combine(
+                    journeyRoutePath.startDate, journeyRoutePath.startTime
+                )
+            ).total_seconds()
+            / 3600
+        ) / 12
+
+        da = 600 if profile.basicPay > 70000 else 500
+
+        if numberOf12Hours > 1:
+            numberOf12Hours = int(numberOf12Hours)
+            incidentalExpense = numberOf12Hours * da / 2
+
+        if journeyRoutePaths.last() == journeyRoutePath:
+            if journeyRoute.daHaltCondition == DaHaltTypes.NO_FOOD_AND_ACCOMMODATION:
+                daForHalt = (numberOf12Hours / 2) * da
+            elif journeyRoute.daHaltCondition == DaHaltTypes.FOOD_ONLY:
+                daForHalt = (numberOf12Hours / 2) * (da / 2)
+            elif journeyRoute.daHaltCondition == DaHaltTypes.ACCOMMODATION_ONLY:
+                daForHalt = (numberOf12Hours / 2) * (da * (2 / 3))
+            elif journeyRoute.daHaltCondition == DaHaltTypes.FOOD_AND_ACCOMMODATION:
+                daForHalt = (numberOf12Hours / 2) * (da / 4)
+            daForHalt = round(float(int(daForHalt)), 2)
+
+        totalOnRow = (
+            float(journeyRoutePath.routeLink.price)
+            + incidentalExpense
+            + (0 if not daForHalt else float(daForHalt))
+        )
+
+        totalAmount += totalOnRow
+
+        journeyRoutePathsWithCalculations.append(
+            {
+                "start": journeyRoutePath.routeLink.start,
+                "startDate": journeyRoutePath.startDate,
+                "startTime": journeyRoutePath.startTime,
+                "end": journeyRoutePath.routeLink.end,
+                "endDate": journeyRoutePath.endDate,
+                "endTime": journeyRoutePath.endTime,
+                "distance": journeyRoutePath.routeLink.distance,
+                "mode": journeyRoutePath.routeLink.mode,
+                "price": journeyRoutePath.routeLink.price,
+                "incidentalExpense": incidentalExpense,
+                "daForHalt": daForHalt,
+                "total": totalOnRow,
+            }
+        )
+
     return render(
         request,
         "generate_report.html",
         {
             "profile": profile,
             "journeyRoute": journeyRoute,
-            "journeyRoutePaths": journeyRoutePaths,
-            "total_count":len(journeyRoutePaths) 
+            "journeyRoutePaths": journeyRoutePathsWithCalculations,
+            "total_count": len(journeyRoutePathsWithCalculations),
+            "totalAmount": round(totalAmount, 2),
+            "totalAmountInWords": inflect.engine().number_to_words(int(totalAmount)),
+            "longestRoutePath": longestRoutePath,
+            "fromSource": fromSource,
+            "fromDestination": fromDestination,
         },
     )

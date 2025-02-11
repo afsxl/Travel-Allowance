@@ -29,8 +29,10 @@
             {% else %}
             <a href="{% url 'add_route_path' routeWithPaths.route.id %}" class="btn btn-info">Add Route Path</a>
             {% endif %}
+            {% if routeWithPaths.routePaths %}
             <a href="{% url 'add_route_to_journey' routeWithPaths.route.id %}" class="btn btn-info">Add Route To
                 Journey</a>
+            {% endif %}
         </div>
         {% endfor %}
     </div>

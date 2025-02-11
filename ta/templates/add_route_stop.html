@@ -5,15 +5,15 @@
 {% block content %}
 <div class="container">
     <h2>Add a New Route Stop</h2>
-   <span class="response-msg">
-  {% if success %}
-  <p class="success-message">{{ success }}</p>
-  {% endif %}
-  {% if error %}
+    <span class="response-msg">
+        {% if success %}
+        <p class="success-message">{{ success }}</p>
+        {% endif %}
+        {% if error %}
 
-  <p class="error-message">{{ error }}</p>
-    {% endif %}
-   </span>
+        <p class="error-message">{{ error }}</p>
+        {% endif %}
+    </span>
     <form method="post">
         {% csrf_token %}
 
@@ -96,24 +96,28 @@
     .back-link:hover {
         text-decoration: underline;
     }
-    .response-msg{
+
+    .response-msg {
         display: flex;
         width: 100%;
         place-items: center;
         justify-content: center;
     }
-    .response-msg p{
-       margin: 0;
-       padding: 0;
+
+    .response-msg p {
+        margin: 0;
+        padding: 0;
     }
-    .success-message{
+
+    .success-message {
         border: 2px solid green;
-        padding-inline:1rem !important;
+        padding-inline: 1rem !important;
         border-radius: 8px;
     }
-    .error-message{
+
+    .error-message {
         border: 2px solid rgb(255, 0, 0);
-        padding-inline:1rem !important;
+        padding-inline: 1rem !important;
         border-radius: 8px;
     }
 </style>

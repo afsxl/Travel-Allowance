@@ -252,7 +252,7 @@
 	</div>
 	<table border="1" width="100%" class="table-1">
 		<tr>
-			<td>Head Quarters:</td>
+			<td>Head Quarters: {{ profile.collegeDistrict }}</td>
 			<td>Name in Capital letters: {{ user.first_name|upper }} {{ user.last_name|upper }}</td>
 			<td>Basic Pay: {{ profile.basicPay }} </td>
 			<td>Allowance:</td>
@@ -264,7 +264,7 @@
 		</tr>
 		<tr>
 			<td></td>
-			<td>Address:</td>
+			<td>Address: {{ profile.address }}</td>
 			<td colspan="2">Bank & Branch: {{ profile.bankName }} & {{ profile.branchName }}</td>
 		</tr>
 	</table>
@@ -293,24 +293,26 @@
 		{% if journeyRoutePaths %}
 		{% for journeyRoutePath in journeyRoutePaths %}
 		<tr>
-			<td>{{ journeyRoutePath.routeLink.start }}</td>
+			<td>{{ journeyRoutePath.start }}</td>
 			<td>{{ journeyRoutePath.startDate }}</td>
 			<td>{{ journeyRoutePath.startTime }}</td>
-			<td>{{ journeyRoutePath.routeLink.end }}</td>
+			<td>{{ journeyRoutePath.end }}</td>
 			<td>{{ journeyRoutePath.endDate }}</td>
 			<td>{{ journeyRoutePath.endTime }}</td>
-			<td>{{ journeyRoutePath.routeLink.distance }}</td>
-			<td>{{ journeyRoutePath.routeLink.mode }}</td>
-			<td>{{ journeyRoutePath.routeLink.price }} Rs</td>
-			<td>{{ 0 }}</td>
-			<td> To Calculate </td>
-			<td> To Calculate </td>
+			<td>{{ journeyRoutePath.distance }}</td>
+			<td>{{ journeyRoutePath.mode }}</td>
+			<td>{{ journeyRoutePath.price }} Rs</td>
+			<td>{{ journeyRoutePath.incidentalExpense }} Rs</td>
+			{% if journeyRoutePath.daForHalt %}
+			<td>{{ journeyRoutePath.daForHalt }} Rs</td>
+			{% else %}
+			<td></td>
+			{% endif %}
+			<td>{{ journeyRoutePath.total }} Rs</td>
 			{% if forloop.first %}
 			<td class="vertical-text" rowspan="{{ total_count }}">{{ journeyRoute.purpose }}</td>
 			{% endif %}
 			<td class="remarks"></td>
-			
-
 		</tr>
 		{% endfor %}
 		{% else %}
@@ -330,28 +332,77 @@
 			<td></td>
 			<td></td>
 			<td></td>
-			<td></td>
+			<td>{{ totalAmount }} Rs</td>
 			<td></td>
 		</tr>
 	</table>
 	<div class="consent">
-		<p>Certified that i have performed journey from ...................................................... to
-			...................................................... by
-			......................................................and <br> From
-			...................................................... to
-			......................................................
-			by ......................................................</p>
-		<p>Certified that i will perform journey from ............................................................ to
-			...................................................... by
-			......................................................and <br> From
-			...................................................... to
-			......................................................
-			by ......................................................</p>
+		<p>Certified that i have performed journey from
+			<span style="border-bottom: 1.5px dotted black; padding-inline: .8rem;">
+				{{ longestRoutePath.routeLink.start }}
+			</span>
+			to
+			<span style="border-bottom: 1.5px dotted black; padding-inline: .8rem;">
+				{{ longestRoutePath.routeLink.end }}
+			</span>
+			by
+			<span style="border-bottom: 1.5px dotted black; padding-inline: .8rem;">
+				{{ longestRoutePath.routeLink.mode }}
+			</span>
+			and <br> From
+			<span style="border-bottom: 1.5px dotted black; padding-inline: .8rem;">
+				{{ fromSource.routeLink.start }}
+			</span>
+			to
+			<span style="border-bottom: 1.5px dotted black; padding-inline: .8rem;">
+				{{ fromSource.routeLink.end }}
+			</span>
+			by
+			<span style="border-bottom: 1.5px dotted black; padding-inline: .8rem;">
+				{{ fromSource.routeLink.mode }}
+			</span>
+		</p>
+		<p>Certified that i will perform journey from
+			<span style="border-bottom: 1.5px dotted black; padding-inline: .8rem;">
+				{{ longestRoutePath.routeLink.end }}
+			</span>
+			to
+			<span style="border-bottom: 1.5px dotted black; padding-inline: .8rem;">
+				{{ longestRoutePath.routeLink.start }}
+			</span> by
+			<span style="border-bottom: 1.5px dotted black; padding-inline: .8rem;">
+				{{ longestRoutePath.routeLink.mode }}
+			</span>
+			and <br> From
+			<span style="border-bottom: 1.5px dotted black; padding-inline: .8rem;">
+				{{ fromDestination.routeLink.start }}
+			</span>
+			to
+			<span style="border-bottom: 1.5px dotted black; padding-inline: .8rem;">
+				{{ fromDestination.routeLink.end }}
+			</span>
+			by
+			<span style="border-bottom: 1.5px dotted black; padding-inline: .8rem;">
+				{{ fromDestination.routeLink.mode }}
+			</span>
+		</p>
 		<div>
-			<p>Recieved from the Joint Director, State Institute of Technical Teachers Training & <br>
-				Research,Kalamassery
-				An amount of &#8377;........................./-
-				(Rupees.........................<br>........................................................................................................only)
+			<p>
+				Recieved from the Joint Director,
+				<span id="report-title">
+					STATE INSTITUTE OF TECHNICAL TEACHERS TRAINING & RESEARCH, KALAMASSERY
+				</span>
+				<br>
+				An amount of &#8377;
+				<span style="border-bottom: 1.5px dotted black; padding-inline: .8rem;">
+					{{ totalAmount }}
+				</span>
+				/-
+				(Rupees
+				<span style="border-bottom: 1.5px dotted black; padding-inline: .8rem;">
+					{{ totalAmountInWords }}
+				</span>
+				only)
 				being<br>
 			</p>
 			<span>
@@ -385,6 +436,7 @@
 		var button = document.getElementById("editButton");
 		var header = document.getElementById("instituteHeader");
 		var remarks = document.querySelectorAll('.remarks');
+		var reportTitle = document.getElementById("report-title");
 
 		if (isEdit) {
 			header.setAttribute("contenteditable", "true");
@@ -400,6 +452,7 @@
 			header.removeAttribute("contenteditable");
 			header.style.border = "none";
 			button.textContent = "Edit";
+			reportTitle.innerHTML = header.textContent;
 
 			remarks.forEach(function (remark) {
 				remark.removeAttribute("contenteditable");

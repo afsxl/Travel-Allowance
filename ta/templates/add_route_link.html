@@ -10,10 +10,10 @@
         <p class="success-message">{{ success }}</p>
         {% endif %}
         {% if error %}
-      
+
         <p class="error-message">{{ error }}</p>
-          {% endif %}
-         </span>
+        {% endif %}
+    </span>
     <form method="POST">
         {% csrf_token %}
 
@@ -198,14 +198,16 @@
     .delete-btn:hover {
         background-color: #c82333;
     }
-    .success-message{
+
+    .success-message {
         border: 2px solid green;
-        padding-inline:1rem !important;
+        padding-inline: 1rem !important;
         border-radius: 8px;
     }
-    .error-message{
+
+    .error-message {
         border: 2px solid rgb(255, 0, 0);
-        padding-inline:1rem !important;
+        padding-inline: 1rem !important;
         border-radius: 8px;
     }
 </style>

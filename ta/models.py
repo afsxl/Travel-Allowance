@@ -15,6 +15,13 @@ class ModesOfTravel(models.IntegerChoices):
     WALK = 4, "Walk"
 
 
+class DaHaltTypes(models.IntegerChoices):
+    NO_FOOD_AND_ACCOMMODATION = 1, "No Food And Accommodation"
+    FOOD_ONLY = 2, "Food Only"
+    ACCOMMODATION_ONLY = 3, "Accommodation Only"
+    FOOD_AND_ACCOMMODATION = 4, "Food And Accommodation"
+
+
 class UserDetails(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=False)
     designation = models.CharField(max_length=255, null=False)
@@ -24,12 +31,15 @@ class UserDetails(models.Model):
     ifscCode = models.CharField(max_length=255, null=False)
     bankName = models.CharField(max_length=255, null=False)
     branchName = models.CharField(max_length=255, null=False)
+    collegeName = models.CharField(max_length=255, null=False)
+    collegeDistrict = models.CharField(max_length=255, null=False)
+    address = models.TextField(null=False)
 
 
 class RouteStop(models.Model):
     name = models.CharField(max_length=255, null=False)
     type = models.IntegerField(choices=StopTypes.choices, null=False)
-    createdBy = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
+    createdBy = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     verified = models.BooleanField(default=False)
 
 
@@ -40,7 +50,7 @@ class Route(models.Model):
     destination = models.ForeignKey(
         RouteStop, on_delete=models.CASCADE, null=False, related_name="routeDestination"
     )
-    createdBy = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
+    createdBy = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     verified = models.BooleanField(default=False)
 
 
@@ -54,7 +64,7 @@ class RouteLink(models.Model):
     distance = models.DecimalField(max_digits=6, decimal_places=2, null=False)
     mode = models.IntegerField(choices=ModesOfTravel.choices, null=False)
     price = models.DecimalField(max_digits=10, decimal_places=2, null=False)
-    createdBy = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
+    createdBy = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     verified = models.BooleanField(default=False)
 
 
@@ -62,7 +72,7 @@ class RoutePath(models.Model):
     route = models.ForeignKey(Route, on_delete=models.CASCADE, null=False)
     routeLink = models.ForeignKey(RouteLink, on_delete=models.CASCADE, null=False)
     order = models.IntegerField(null=False)
-    createdBy = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
+    createdBy = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
 
 
 class TemporaryRoutePath(models.Model):
@@ -77,6 +87,7 @@ class JourneyRoute(models.Model):
     destination = models.CharField(max_length=255, null=False)
     purpose = models.CharField(max_length=255, null=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
+    daHaltCondition = models.IntegerField(choices=DaHaltTypes.choices, null=False)
 
 
 class JourneyRouteLink(models.Model):
