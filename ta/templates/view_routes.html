@@ -5,7 +5,42 @@
 {% block content %}
 <div class="container">
     <h1>View Routes</h1>
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <div class="row">
+                <div class="col">
+                    <label for="source">Source :</label>
+                    <select id="source" name="source" required>
+                        <option value="" selected disabled>-- Select Source --</option>
+                        {% for stop in stops %}
+                        <option value="{{ stop.id }}">{{ stop.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col">
+                    <label for="destination">Destination :</label>
+                    <select id="destination" name="destination" required>
+                        <option value="" selected disabled>-- Select Destination --</option>
+                        {% for stop in stops %}
+                        <option value="{{ stop.id }}">{{ stop.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="search-button-container">
+                    <button type="submit">Search Route</button>
+                </div>
+            </div>
+        </div>
+    </form>
     <div class="list-group">
+        {% if not routesWithPaths %}
+        <div class="list-group-item">
+            Not Routes Found
+        </div>
+        {% else %}
         {% for routeWithPaths in routesWithPaths %}
         <div class="list-group-item">
             <h3>{{ routeWithPaths.route.source.name }} → {{ routeWithPaths.route.destination.name }}</h3>
@@ -35,10 +70,26 @@
             {% endif %}
         </div>
         {% endfor %}
+        {% endif %}
     </div>
 </div>
 
 <style>
+    .row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+    }
+
+    .col {
+        flex: 2;
+        margin-right: 5px;
+    }
+
+    .col:last-child {
+        margin-right: 0;
+    }
+
     .container {
         background-color: white;
         padding: 20px;
@@ -80,6 +131,51 @@
 
     .btn:hover {
         opacity: 0.8;
+    }
+
+    label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    select,
+    input[type="number"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 1rem;
+        box-sizing: border-box;
+        transition: border-color 0.3s ease;
+    }
+
+    select:focus,
+    input:focus {
+        border-color: #007bff;
+        outline: none;
+    }
+
+    button {
+        padding: 10px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+        background-color: #0056b3;
+    }
+
+    .search-button-container {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        margin-right: 5px;
+        justify-content: end;
     }
 </style>
 {% endblock %}

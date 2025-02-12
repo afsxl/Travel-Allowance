@@ -114,12 +114,26 @@ def view_profile(request):
 
 @login_required
 def view_routes(request):
+    routeStops = RouteStop.objects.filter(
+        Q(verified=True) | Q(createdBy=request.user)
+    ).exclude(type=StopTypes.INTERMEDIATE_STOP)
     routes = Route.objects.filter(Q(verified=True) | Q(createdBy=request.user))
+
     routesWithPaths = []
+
+    if request.method == "POST":
+        sourceId = request.POST.get("source")
+        destinationId = request.POST.get("destination")
+        routes = routes.filter(source=sourceId, destination=destinationId)
+
     for route in routes:
         routePaths = RoutePath.objects.filter(route=route).order_by("order")
         routesWithPaths.append({"route": route, "routePaths": routePaths})
-    return render(request, "view_routes.html", {"routesWithPaths": routesWithPaths})
+    return render(
+        request,
+        "view_routes.html",
+        {"routesWithPaths": routesWithPaths, "stops": routeStops},
+    )
 
 
 @login_required
