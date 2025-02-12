@@ -48,8 +48,7 @@ def logout_view(request):
 
 @login_required
 def home_view(request):
-    routes = Route.objects.all()
-    return render(request, "home.html", {"routes": routes})
+    return render(request, "home.html")
 
 
 def view_profile(request):
@@ -145,7 +144,6 @@ def add_route_stop(request):
     stopType = ""
 
     if request.method == "POST":
-
         routeStopName = request.POST.get("routeStopName")
         stopType = request.POST.get("stopType")
 
@@ -392,8 +390,6 @@ def save_all_route_path(request, routeId):
     route = Route.objects.get(id=routeId)
     error = ""
 
-    RoutePath.objects.filter(route=route, createdBy=request.user).delete()
-
     temporaryRoutePaths = TemporaryRoutePath.objects.filter(
         route=route, createdBy=request.user
     ).order_by("order")
@@ -417,6 +413,8 @@ def save_all_route_path(request, routeId):
                 "error": error,
             },
         )
+
+    RoutePath.objects.filter(route=route, createdBy=request.user).delete()
 
     for index, temporaryRoutePath in enumerate(temporaryRoutePaths):
         RoutePath.objects.create(
@@ -621,9 +619,13 @@ def generate_report(request, journeyRouteId):
 
         da = 600 if profile.basicPay > 70000 else 500
 
+        if numberOf12Hours > 0.5:
+            incidentalExpense = da / 2
         if numberOf12Hours > 1:
             numberOf12Hours = int(numberOf12Hours)
-            incidentalExpense = numberOf12Hours * da / 2
+            incidentalExpense = +numberOf12Hours * da / 2
+
+        print(incidentalExpense)
 
         if journeyRoutePaths.last() == journeyRoutePath:
             if journeyRoute.daHaltCondition == DaHaltTypes.NO_FOOD_AND_ACCOMMODATION:
