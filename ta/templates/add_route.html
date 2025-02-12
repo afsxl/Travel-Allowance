@@ -10,48 +10,45 @@
         <p class="success-message">{{ success }}</p>
         {% endif %}
         {% if error %}
-      
+
         <p class="error-message">{{ error }}</p>
-          {% endif %}
-         </span>
+        {% endif %}
+    </span>
     <form method="POST">
         {% csrf_token %}
 
         <div class="form-group">
-            <label for="source">Source</label>
-            <select name="source" id="source" class="form-control" required>
-                {% if not sourceId %}
-                <option value="" disabled selected>-- Select Source --</option>
-                {% else %}
-                <option value="" disabled>-- Select Source --</option>
-                {% endif %}
+            <label for="searchSource">Source</label>
+            <input type="hidden" id="source" name="source" required>
+            <input type="text" id="searchSource" class="form-control" placeholder="Search Source..."
+                onkeyup="filterStops('searchSource', 'dropdownSourceList', 'source')"
+                onfocus="showDropdown('dropdownSourceList')" autocomplete="off">
+            <div id="dropdownSourceList" class="dropdown-content">
                 {% for stop in route_stops %}
-                {% if stop.id|stringformat:"s" == sourceId %}
-                <option value="{{ stop.id }}" selected>{{ stop.name }}</option>
-                {% else %}
-                <option value="{{ stop.id }}">{{ stop.name }}</option>
-                {% endif %}
+                <div class="dropdown-item"
+                    onclick="selectStop('{{ stop.id }}', '{{ stop.name }}', 'searchSource', 'source', 'dropdownSourceList')">
+                    {{ stop.name }}
+                </div>
                 {% endfor %}
-            </select>
+            </div>
         </div>
 
         <div class="form-group">
-            <label for="destination">Destination</label>
-            <select name="destination" id="destination" class="form-control" required>
-                {% if not destinationId %}
-                <option value="" disabled selected>-- Select Source --</option>
-                {% else %}
-                <option value="" disabled>-- Select Source --</option>
-                {% endif %}
+            <label for="searchDestination">Destination</label>
+            <input type="hidden" id="destination" name="destination" required>
+            <input type="text" id="searchDestination" class="form-control" placeholder="Search Destination..."
+                onkeyup="filterStops('searchDestination', 'dropdownDestinationList', 'destination')"
+                onfocus="showDropdown('dropdownDestinationList')" autocomplete="off">
+            <div id="dropdownDestinationList" class="dropdown-content">
                 {% for stop in route_stops %}
-                {% if stop.id|stringformat:"s" == destinationId %}
-                <option value="{{ stop.id }}" selected>{{ stop.name }}</option>
-                {% else %}
-                <option value="{{ stop.id }}">{{ stop.name }}</option>
-                {% endif %}
+                <div class="dropdown-item"
+                    onclick="selectStop('{{ stop.id }}', '{{ stop.name }}', 'searchDestination', 'destination', 'dropdownDestinationList')">
+                    {{ stop.name }}
+                </div>
                 {% endfor %}
-            </select>
+            </div>
         </div>
+
 
         <button type="submit" class="btn btn-primary">Save Route</button>
     </form>
@@ -89,16 +86,84 @@
     .btn:hover {
         background-color: #0056b3;
     }
-    .success-message{
+
+    .success-message {
         border: 2px solid green;
-        padding-inline:1rem !important;
+        padding-inline: 1rem !important;
         border-radius: 8px;
     }
-    .error-message{
+
+    .error-message {
         border: 2px solid rgb(255, 0, 0);
-        padding-inline:1rem !important;
+        padding-inline: 1rem !important;
         border-radius: 8px;
+    }
+
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: white;
+        border: 1px solid #ddd;
+        max-height: 200px;
+        overflow-y: auto;
+        width: 100%;
+        z-index: 1000;
+    }
+
+    .dropdown-item {
+        padding: 8px;
+        cursor: pointer;
+    }
+
+    .dropdown-item:hover {
+        background-color: #f1f1f1;
     }
 </style>
+<script>
+    function filterStops(inputId, dropdownId, hiddenInputId) {
+        let input = document.getElementById(inputId);
+        let filter = input.value.toLowerCase();
+        let dropdown = document.getElementById(dropdownId);
+        let items = dropdown.getElementsByClassName("dropdown-item");
+
+        dropdown.style.display = "block";
+
+        for (let i = 0; i < items.length; i++) {
+            let txtValue = items[i].textContent || items[i].innerText;
+            if (txtValue.toLowerCase().includes(filter)) {
+                items[i].style.display = "";
+            } else {
+                items[i].style.display = "none";
+            }
+        }
+
+        if (filter === "") {
+            showDropdown(dropdownId);
+        }
+    }
+
+    function showDropdown(dropdownId) {
+        document.getElementById(dropdownId).style.display = "block";
+    }
+
+    function selectStop(id, name, inputId, hiddenInputId, dropdownId) {
+        document.getElementById(inputId).value = name; // Set text input value
+        document.getElementById(hiddenInputId).value = id; // Store selected stop ID in hidden field
+        document.getElementById(dropdownId).style.display = "none"; // Hide dropdown
+    }
+
+    document.addEventListener("click", function (event) {
+        let dropdowns = ["dropdownSourceList", "dropdownDestinationList"];
+        dropdowns.forEach(dropdownId => {
+            let dropdown = document.getElementById(dropdownId);
+            let input = document.getElementById(dropdownId.replace("List", "")); // Find corresponding input field
+
+            if (!input.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.style.display = "none";
+            }
+        });
+    });
+
+</script>
 
 {% endblock %}

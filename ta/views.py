@@ -123,7 +123,10 @@ def view_routes(request):
     if request.method == "POST":
         sourceId = request.POST.get("source")
         destinationId = request.POST.get("destination")
-        routes = routes.filter(source=sourceId, destination=destinationId)
+        if sourceId and destinationId:
+            routes = routes.filter(source=sourceId, destination=destinationId)
+        else:
+            routes = []
 
     for route in routes:
         routePaths = RoutePath.objects.filter(route=route).order_by("order")

@@ -11,24 +11,37 @@
         <div class="form-group">
             <div class="row">
                 <div class="col">
-                    <label for="source">Source :</label>
-                    <select id="source" name="source" required>
-                        <option value="" selected disabled>-- Select Source --</option>
+                    <label for="searchDropdown">Source:</label>
+                    <input type="hidden" id="source" name="source">
+                    <input type="text" id="searchDropdown" placeholder="Search Source..."
+                        onkeyup="filterStops('searchDropdown', 'dropdownList', 'source')"
+                        onfocus="showDropdown('dropdownList')" required autocomplete="off">
+                    <div id="dropdownList" class="dropdown-content">
                         {% for stop in stops %}
-                        <option value="{{ stop.id }}">{{ stop.name }}</option>
+                        <div class="dropdown-item"
+                            onclick="selectStop('{{ stop.id }}', '{{ stop.name }}', 'searchDropdown', 'source', 'dropdownList')">
+                            {{ stop.name }}
+                        </div>
                         {% endfor %}
-                    </select>
+                    </div>
                 </div>
 
                 <div class="col">
-                    <label for="destination">Destination :</label>
-                    <select id="destination" name="destination" required>
-                        <option value="" selected disabled>-- Select Destination --</option>
+                    <label for="destinationDropdown">Destination:</label>
+                    <input type="hidden" id="destination" name="destination">
+                    <input type="text" id="destinationDropdown" placeholder="Search Destination..."
+                        onkeyup="filterStops('destinationDropdown', 'destinationDropdownList', 'destination')"
+                        onfocus="showDropdown('destinationDropdownList')" required autocomplete="off">
+                    <div id="destinationDropdownList" class="dropdown-content">
                         {% for stop in stops %}
-                        <option value="{{ stop.id }}">{{ stop.name }}</option>
+                        <div class="dropdown-item"
+                            onclick="selectStop('{{ stop.id }}', '{{ stop.name }}', 'destinationDropdown', 'destination', 'destinationDropdownList')">
+                            {{ stop.name }}
+                        </div>
                         {% endfor %}
-                    </select>
+                    </div>
                 </div>
+
                 <div class="search-button-container">
                     <button type="submit">Search Route</button>
                 </div>
@@ -177,5 +190,70 @@
         margin-right: 5px;
         justify-content: end;
     }
+
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        max-height: 200px;
+        overflow-y: auto;
+        width: 200px;
+        z-index: 999;
+    }
+
+    .dropdown-item {
+        padding: 8px;
+        cursor: pointer;
+    }
+
+    .dropdown-item:hover {
+        background-color: #f1f1f1;
+    }
 </style>
+<script>
+    function filterStops(inputId, dropdownId, hiddenInputId) {
+        let input = document.getElementById(inputId);
+        let filter = input.value.toLowerCase();
+        let dropdown = document.getElementById(dropdownId);
+        let items = dropdown.getElementsByClassName("dropdown-item");
+
+        dropdown.style.display = "block";
+
+        for (let i = 0; i < items.length; i++) {
+            let txtValue = items[i].textContent || items[i].innerText;
+            if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                items[i].style.display = "";
+            } else {
+                items[i].style.display = "none";
+            }
+        }
+
+        if (filter === "") {
+            showDropdown(dropdownId);
+        }
+    }
+
+    function showDropdown(dropdownId) {
+        document.getElementById(dropdownId).style.display = "block";
+    }
+
+    function selectStop(id, name, inputId, hiddenInputId, dropdownId) {
+        document.getElementById(inputId).value = name;
+        document.getElementById(hiddenInputId).value = id;
+        document.getElementById(dropdownId).style.display = "none";
+    }
+
+    document.addEventListener("click", function (event) {
+        let dropdowns = ["dropdownList", "destinationDropdownList"];
+        dropdowns.forEach(dropdownId => {
+            let dropdown = document.getElementById(dropdownId);
+            let input = document.getElementById(dropdownId.replace("List", ""));
+
+            if (!input.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.style.display = "none";
+            }
+        });
+    });
+</script>
 {% endblock %}

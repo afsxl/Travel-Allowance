@@ -17,43 +17,38 @@
     <form method="POST">
         {% csrf_token %}
 
-        <div class="row">
-            <div class="col">
-                <label for="start">Start:</label>
-                <select id="start" name="start" required>
-                    {% if not start %}
-                    <option value="" selected disabled>-- Select Start Location --</option>
-                    {% else %}
-                    <option value="" disabled>-- Select Start Location --</option>
-                    {% endif %}
-                    {% for stop in stops %}
-                    {% if start == stop.id|stringformat:"s" %}
-                    <option value="{{ stop.id }}" selected>{{ stop.name }}</option>
-                    {% else %}
-                    <option value="{{ stop.id }}">{{ stop.name }}</option>
-                    {% endif %}
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="col">
-                <label for="end">End:</label>
-                <select id="end" name="end" required>
-                    {% if not end %}
-                    <option value="" selected disabled>-- Select End Location --</option>
-                    {% else %}
-                    <option value="" disabled>-- Select End Location --</option>
-                    {% endif %}
-                    {% for stop in stops %}
-                    {% if end == stop.id|stringformat:"s" %}
-                    <option value="{{ stop.id }}" selected>{{ stop.name }}</option>
-                    {% else %}
-                    <option value="{{ stop.id }}">{{ stop.name }}</option>
-                    {% endif %}
-                    {% endfor %}
-                </select>
+        <div class="col">
+            <label for="searchStart">Start:</label>
+            <input type="hidden" id="start" name="start">
+            <input type="text" id="searchStart" class="form-control" placeholder="Search Start Location..."
+                onkeyup="filterStops('searchStart', 'dropdownStartList', 'start')"
+                onfocus="showDropdown('dropdownStartList')" autocomplete="off">
+            <div id="dropdownStartList" class="dropdown-content">
+                {% for stop in stops %}
+                <div class="dropdown-item"
+                    onclick="selectStop('{{ stop.id }}', '{{ stop.name }}', 'searchStart', 'start', 'dropdownStartList')">
+                    {{ stop.name }}
+                </div>
+                {% endfor %}
             </div>
         </div>
+
+        <div class="col">
+            <label for="searchEnd">End:</label>
+            <input type="hidden" id="end" name="end">
+            <input type="text" id="searchEnd" class="form-control" placeholder="Search End Location..."
+                onkeyup="filterStops('searchEnd', 'dropdownEndList', 'end')" onfocus="showDropdown('dropdownEndList')"
+                autocomplete="off">
+            <div id="dropdownEndList" class="dropdown-content">
+                {% for stop in stops %}
+                <div class="dropdown-item"
+                    onclick="selectStop('{{ stop.id }}', '{{ stop.name }}', 'searchEnd', 'end', 'dropdownEndList')">
+                    {{ stop.name }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
 
         <div class="row">
             <div class="col">
@@ -208,6 +203,89 @@
         padding-inline: 1rem !important;
         border-radius: 8px;
     }
+
+    /* Dropdown Container */
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: white;
+        border: 1px solid #ddd;
+        max-height: 200px;
+        overflow-y: auto;
+        width: 100%;
+        z-index: 1000;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 5px;
+        margin-top: 5px;
+    }
+
+    /* Dropdown Items */
+    .dropdown-item {
+        padding: 10px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    /* Hover effect for dropdown items */
+    .dropdown-item:hover {
+        background-color: #f1f1f1;
+    }
+
+    /* Adjusting position and box-shadow */
+    .dropdown-content {
+        width: 100%;
+        max-height: 300px;
+        /* Increased for better visibility */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        border-radius: 5px;
+    }
 </style>
+<script>
+    function filterStops(inputId, dropdownId, hiddenInputId) {
+        let input = document.getElementById(inputId);
+        let filter = input.value.toLowerCase();
+        let dropdown = document.getElementById(dropdownId);
+        let items = dropdown.getElementsByClassName("dropdown-item");
+
+        dropdown.style.display = "block";
+
+        for (let i = 0; i < items.length; i++) {
+            let txtValue = items[i].textContent || items[i].innerText;
+            if (txtValue.toLowerCase().includes(filter)) {
+                items[i].style.display = "";
+            } else {
+                items[i].style.display = "none";
+            }
+        }
+
+        if (filter === "") {
+            showDropdown(dropdownId);
+        }
+    }
+
+    function showDropdown(dropdownId) {
+        document.getElementById(dropdownId).style.display = "block";
+    }
+
+    function selectStop(id, name, inputId, hiddenInputId, dropdownId) {
+        document.getElementById(inputId).value = name;
+        document.getElementById(hiddenInputId).value = id;
+        document.getElementById(dropdownId).style.display = "none";
+    }
+
+    document.addEventListener("click", function (event) {
+        let dropdowns = ["dropdownStartList", "dropdownEndList"];
+        dropdowns.forEach(dropdownId => {
+            let dropdown = document.getElementById(dropdownId);
+            let input = document.getElementById(dropdownId.replace("List", ""));
+
+            if (!input.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.style.display = "none";
+            }
+        });
+    });
+
+</script>
 
 {% endblock %}

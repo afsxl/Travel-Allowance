@@ -17,16 +17,21 @@
     <form method="POST" action="{% url 'add_route_path' route.id %}">
         {% csrf_token %}
         <div class="form-group">
-            <label for="route_link_id">Route Link</label>
-            <select name="routeLinkId" class="form-control" required>
-                <option value="" selected disabled>-- Select Route Link --</option>
+            <label for="searchRouteLink">Route Link</label>
+            <input type="hidden" id="routeLinkId" name="routeLinkId" required>
+            <input type="text" id="searchRouteLink" class="form-control" placeholder="Search Route Link..."
+                onkeyup="filterStops('searchRouteLink', 'dropdownRouteLinkList', 'routeLinkId')"
+                onfocus="showDropdown('dropdownRouteLinkList')" autocomplete="off">
+            <div id="dropdownRouteLinkList" class="dropdown-content">
                 {% for routeLink in routeLinks %}
-                <option value="{{ routeLink.id }}">
+                <div class="dropdown-item"
+                    onclick="selectStop('{{ routeLink.id }}', '{{ routeLink.start.name }} to {{ routeLink.end.name }} ({{ routeLink.get_mode_display }})', 'searchRouteLink', 'routeLinkId', 'dropdownRouteLinkList')">
                     {{ routeLink.start.name }} to {{ routeLink.end.name }} ({{ routeLink.get_mode_display }})
-                </option>
+                </div>
                 {% endfor %}
-            </select>
+            </div>
         </div>
+
         <div class="btn-class">
             <button type="submit" class="btn btn-primary">Add Path</button>
         </div>
@@ -134,5 +139,75 @@
         padding-inline: 1rem !important;
         border-radius: 8px;
     }
+
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: white;
+        border: 1px solid #ddd;
+        max-height: 200px;
+        overflow-y: auto;
+        width: 100%;
+        z-index: 1000;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 5px;
+        margin-top: 5px;
+    }
+
+    .dropdown-item {
+        padding: 10px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .dropdown-item:hover {
+        background-color: #f1f1f1;
+    }
 </style>
+<script>
+    function filterStops(inputId, dropdownId, hiddenInputId) {
+        let input = document.getElementById(inputId);
+        let filter = input.value.toLowerCase();
+        let dropdown = document.getElementById(dropdownId);
+        let items = dropdown.getElementsByClassName("dropdown-item");
+
+        dropdown.style.display = "block";
+
+        for (let i = 0; i < items.length; i++) {
+            let txtValue = items[i].textContent || items[i].innerText;
+            if (txtValue.toLowerCase().includes(filter)) {
+                items[i].style.display = "";
+            } else {
+                items[i].style.display = "none";
+            }
+        }
+
+        if (filter === "") {
+            showDropdown(dropdownId);
+        }
+    }
+
+    function showDropdown(dropdownId) {
+        document.getElementById(dropdownId).style.display = "block";
+    }
+
+    function selectStop(id, name, inputId, hiddenInputId, dropdownId) {
+        document.getElementById(inputId).value = name;
+        document.getElementById(hiddenInputId).value = id;
+        document.getElementById(dropdownId).style.display = "none";
+    }
+
+    document.addEventListener("click", function (event) {
+        let dropdowns = ["dropdownRouteLinkList"];
+        dropdowns.forEach(dropdownId => {
+            let dropdown = document.getElementById(dropdownId);
+            let input = document.getElementById(dropdownId.replace("List", ""));
+
+            if (!input.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.style.display = "none";
+            }
+        });
+    });
+
+</script>
 {% endblock %}

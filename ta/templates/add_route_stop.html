@@ -20,21 +20,22 @@
         <label for="routeStopName">Enter Stop Name</label>
         <input type="text" name="routeStopName" placeholder="Stop Name" value="{{ routeStopName }}" required>
 
-        <label for="stopType">Select Stop Type</label>
-        <select name="stopType" required>
-            {% if stopType %}
-            <option value="" disabled>-- Select Stop Type --</option>
-            {% else %}
-            <option value="" selected disabled>-- Select Stop Type --</option>
-            {% endif %}
-            {% for value,label in stopTypes %}
-            {% if stopType == value|stringformat:"s" %}
-            <option value="{{ value }}" selected>{{ label }}</option>
-            {% else %}
-            <option value="{{ value }}">{{ label }}</option>
-            {% endif %}
-            {% endfor %}
-        </select>
+        <div class="form-group">
+            <label for="searchStopType">Select Stop Type</label>
+            <input type="hidden" id="stopType" name="stopType" required>
+            <input type="text" id="searchStopType" class="form-control" placeholder="Search Stop Type..."
+                onkeyup="filterStops('searchStopType', 'dropdownStopTypeList', 'stopType')"
+                onfocus="showDropdown('dropdownStopTypeList')" autocomplete="off">
+            <div id="dropdownStopTypeList" class="dropdown-content">
+                {% for value, label in stopTypes %}
+                <div class="dropdown-item"
+                    onclick="selectStop('{{ value }}', '{{ label }}', 'searchStopType', 'stopType', 'dropdownStopTypeList')">
+                    {{ label }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
 
         <button type="submit" class="btn btn-primary">Save</button>
     </form>
@@ -120,5 +121,72 @@
         padding-inline: 1rem !important;
         border-radius: 8px;
     }
+
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: white;
+        border: 1px solid #ddd;
+        max-height: 200px;
+        overflow-y: auto;
+        width: "fit-content";
+        z-index: 1000;
+    }
+
+    .dropdown-item {
+        padding: 8px;
+        cursor: pointer;
+    }
+
+    .dropdown-item:hover {
+        background-color: #f1f1f1;
+    }
 </style>
+<script>
+    function filterStops(inputId, dropdownId, hiddenInputId) {
+        let input = document.getElementById(inputId);
+        let filter = input.value.toLowerCase();
+        let dropdown = document.getElementById(dropdownId);
+        let items = dropdown.getElementsByClassName("dropdown-item");
+
+        dropdown.style.display = "block";
+
+        for (let i = 0; i < items.length; i++) {
+            let txtValue = items[i].textContent || items[i].innerText;
+            if (txtValue.toLowerCase().includes(filter)) {
+                items[i].style.display = "";
+            } else {
+                items[i].style.display = "none";
+            }
+        }
+
+        if (filter === "") {
+            showDropdown(dropdownId);
+        }
+    }
+
+    function showDropdown(dropdownId) {
+        document.getElementById(dropdownId).style.display = "block";
+    }
+
+    function selectStop(id, name, inputId, hiddenInputId, dropdownId) {
+        document.getElementById(inputId).value = name;
+        document.getElementById(hiddenInputId).value = id;
+        document.getElementById(dropdownId).style.display = "none";
+    }
+
+    document.addEventListener("click", function (event) {
+        let dropdowns = document.querySelectorAll(".dropdown-content");
+
+        dropdowns.forEach(dropdown => {
+            let input = dropdown.previousElementSibling;
+
+            if (!dropdown.contains(event.target) && !input.contains(event.target)) {
+                dropdown.style.display = "none";
+            }
+        });
+    });
+
+
+</script>
 {% endblock %}
